@@ -1,16 +1,4 @@
 /**
- * Assert that the +received+ object matches the +expected+ object (using
- * plain ol' ==). If it doesn't, this method throws an exception with either
- * a default message, or the one given as the last (optional) argument
- */
-function assertEquals(expected, received, message) {
-  if (received != expected) {
-    if (! message) message = "Expected " + expected + " but received " + received;
-    throw message;
-  }
-}
-
-/**
  * Asserts that the given expression is true and throws an exception with
  * a default message, or the optional +message+ parameter
  */
@@ -19,6 +7,16 @@ function assertTrue(expression, message) {
     if (! message) message = "Assertion failed";
     throw message;
   }
+}
+
+/**
+ * Assert that the +received+ object matches the +expected+ object (using
+ * plain ol' ==). If it doesn't, this method throws an exception with either
+ * a default message, or the one given as the last (optional) argument
+ */
+function assertEquals(expected, received, message) {
+  if (! message) message = "Expected " + expected + " but received " + received;
+  assertTrue(expected == received, message);
 }
 
 /**
@@ -35,10 +33,8 @@ function assertFalse(expression, message) {
  * a default message or the given optional +message+ parameter
  */
 function assertNotNull(thingie, message) {
-  if (thingie == null || thingie.toString() == "[object UIAElementNil]") {
-    if (message == null) message = "Expected not null object";
-    throw message;
-  }
+  if (message == null) message = "Expected not null object";
+  assertTrue(thingie != null && thingie.toString() != "[object UIAElementNil]", message);
 }
 
 /**
