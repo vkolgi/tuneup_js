@@ -13,10 +13,18 @@ testers.
 # Installation #
 
 Put the files for this project in the same location as your test scripts
-that your run from Instruments. At the top of each test script include the
-following:
+that your run from Instruments. I like to use git submodules for third-party
+libraries like so:
 
-    #import "tuneup.js"
+  git submodule add git://github.com/alexvollmer/tuneup_js.git tuneup
+
+Then at the top of each test script include the following:
+
+    #import "tuneup/tuneup.js"
+    
+Regardless of how you like to structure your tests, the path in the initial 
+`#import` statement in your test script needs to be relative to the path
+of the tuneup library.
 
 # Test Structure #
 
