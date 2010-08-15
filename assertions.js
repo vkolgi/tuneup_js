@@ -10,6 +10,18 @@ function assertTrue(expression, message) {
 }
 
 /**
+ * Asserts that the given regular expression matches the result of the 
+ * given message.
+ * @param pattern - the pattern to match
+ * @param expression - the expression to match against
+ * @param message - an optional string message
+ */
+function assertMatch(regExp, expression, message) {
+  if (! message) message = "'" + expression + "' does not match '" + regExp + "'";
+  assertTrue(regExp.test(expression), message);
+}
+
+/**
  * Assert that the +received+ object matches the +expected+ object (using
  * plain ol' ==). If it doesn't, this method throws an exception with either
  * a default message, or the one given as the last (optional) argument
