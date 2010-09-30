@@ -50,12 +50,75 @@ the way). For now though, the basic assertions supported are:
 
   * `assertNotNull`
   * `assertEquals`
+  * `assertMatch`
   * `assertTrue`
   * `assertFalse`
+  * `assertWindow` (more on this below)
   * `fail`
 
 See the `assertions.js` file for all the details.
   
+## Window Assertions ##
+A common theme in writing integration tests for "screen flows" is the
+repetitive cycle of making several assertions on a screen, then engaging some
+user-control after all of the assertions pass. With the UIAutomation API as it
+is, it's easy to lose sight of this structure when bogged down in the syntax of
+asserting and navigating the user interface.
+
+To make this cycle more obvious, and cut down on unnecessary verbosity, use the
+`assertWindow` function. It works by applying a given JavaScript object literal
+to the current main window (UIAWindow instance).
+
+The full details are documented in `assertions.js`, but here's a taste of what
+this assertion can do for your tests. Prior to `assertWindow` you would have
+to do something like this:
+
+  test("my test", function(app, target) {
+    mainWindow = app.mainWindow();
+    navBar = mainWindow.navigationBar();
+    leftButton = navBar.leftButton();
+    rightButton = navBar.rightButton();
+
+    assertEquals("Back", leftButton.name());
+    assertEquals("Done", rightButton.name());
+
+    tableViews = mainWindow.tableViews();
+    assertEquals(1, tableViews.length);
+    table = tableViews[0];
+
+    assertEquals("First Name", table.groups()[0].staticTexts()[0].name());
+    assertEquals("Last Name", table.groups()[1].staticTexts()[0].name());
+
+    assertEquals("Fred", table.cells()[0].name());
+    assertEquals("Flintstone", table.cells()[1].name());
+  });
+
+With `assertWindow`, you can boil it down to this:
+
+  test("my test", function(app, target) {
+    assertWindow({
+      navigationBar: {
+        leftButton: { name: "Back" },
+        rightButton: { name: "Done" }
+      },
+      tableViews: [
+        {
+          groups: [
+            { name: "First Name" },
+            { name: "Last Name" }
+          ],
+          cells: [
+            { name: "Fred" },
+            { name: "Flintstone" }
+          ]
+        }
+      ]
+    }); 
+  });
+
+You can do more than just match string literals. Check out the full
+documentation in `assertions.js` for all the details.
+
 ## `UIAutomation` Extensions ##
 
 The `UIAutomation` library is pretty full-featured, but is a little wordy.
@@ -75,3 +138,4 @@ See the `uiautomation-ext.js` for details.
 # Copyright #
 
 Copyright (c) 2010 Alex Vollmer. See LICENSE for details.
+
