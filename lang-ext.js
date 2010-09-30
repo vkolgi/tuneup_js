@@ -18,5 +18,28 @@ extend(Array.prototype, {
     for (i = 0; i < this.length; i++) {
       f(i, this[i]);
     }
+  },
+
+  /**
+   * Constructs a new array by applying the given function to each element
+   * of this array.
+   */
+  map: function(f) {
+    result = [];
+    this.each(function(i,e) {
+      result.push(f(i, e));
+    });
+    return result;
+  },
+
+  /**
+   * Applies the given function to each element in the array until a
+   * match is made. Otherwise returns null.
+   * */
+  contains: function(f) {
+    for (i = 0; i < this.length; i++) {
+      if (f(this[i])) return this[i];
+    }
+    return null;
   }
 });
