@@ -8,6 +8,21 @@ function extend(destination, source) {
   return destination;
 };
 
+/**
+ * Dump the properties out a String returned by the function.
+ */
+function dumpProperties(obj) {
+  var dumpStr = "";
+  for (var propName in obj) {
+    if (obj.hasOwnProperty(propName)) {
+      if (dumpStr != "") dumpStr += ", ";
+      dumpStr += (propName + "=" + obj[propName]);
+    }
+  }
+
+  return dumpStr;
+}
+
 extend(Array.prototype, {
   /**
   * Performs the given function +f+ on each element in the array instance.
