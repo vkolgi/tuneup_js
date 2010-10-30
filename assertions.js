@@ -250,12 +250,13 @@ function assertPropertiesMatch(expected, given, level) {
         }
       }
       catch(e) {
-        if (typeof(e) == "string") {
-          throw [propName, e];
-        }
-        else {
+        if (e.constructor == Array) {
           e[0] = propName + "." + e[0];
           throw e;
+        }
+        else {
+          var err = [propName, e];
+          throw err;
         }
       }
     }
