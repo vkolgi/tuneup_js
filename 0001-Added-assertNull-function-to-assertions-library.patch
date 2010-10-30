@@ -1,0 +1,36 @@
+From a1e45b84f2bab33d4e04c9d3b508a0ca60f6cc48 Mon Sep 17 00:00:00 2001
+From: Alex Vollmer <alex.vollmer@gmail.com>
+Date: Mon, 18 Oct 2010 17:41:58 -0700
+Subject: [PATCH 1/2] Added 'assertNull()' function to assertions library
+
+---
+ assertions.js |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/assertions.js b/assertions.js
+index 123e5b9..4cf2d86 100644
+--- a/assertions.js
++++ b/assertions.js
+@@ -47,6 +47,19 @@ function assertFalse(expression, message) {
+ }
+ 
+ /**
++ * Asserts that the given object is null or UIAElementNil (UIAutomation's
++ * version of a null stand-in). If the given object is not one of these,
++ * an exception is thrown with a default message or the given optional
++ * +message+ parameter.
++ */
++function assertNull(thingie, message) {
++  var defMessage = "Expected a null object, but received <" + thingie + ">"; 
++  // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
++  assertTrue(thingie == null || thingie.toString() == "[object UIAElementNil]",
++             message ? message + ": " + defMessage : defMessage);
++}
++
++/**
+  * Asserts that the given object is not null or UIAElementNil (UIAutomation's
+  * version of a null stand-in). If it is null, an exception is thrown with
+  * a default message or the given optional +message+ parameter
+-- 
+1.7.2.1
+

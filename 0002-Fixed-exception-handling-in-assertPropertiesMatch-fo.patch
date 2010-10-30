@@ -1,0 +1,35 @@
+From 0aba230a1b99face346a29cb8fa77ae7494467cd Mon Sep 17 00:00:00 2001
+From: Alex Vollmer <alex.vollmer@gmail.com>
+Date: Fri, 29 Oct 2010 11:09:12 -0700
+Subject: [PATCH 2/2] Fixed exception handling in assertPropertiesMatch for better messages.
+
+---
+ assertions.js |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/assertions.js b/assertions.js
+index 4cf2d86..e576182 100644
+--- a/assertions.js
++++ b/assertions.js
+@@ -250,13 +250,14 @@ function assertPropertiesMatch(expected, given, level) {
+         }
+       }
+       catch(e) {
+-        if (typeof(e) == "string") {
+-          throw [propName, e];
+-        }
+-        else {
++        if (e.constructor == Array) {
+           e[0] = propName + "." + e[0];
+           throw e;
+         }
++        else {
++          var err = [propName, e];
++          throw err;
++        }
+       }
+     }
+   }
+-- 
+1.7.2.1
+

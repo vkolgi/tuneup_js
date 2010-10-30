@@ -47,6 +47,19 @@ function assertFalse(expression, message) {
 }
 
 /**
+ * Asserts that the given object is null or UIAElementNil (UIAutomation's
+ * version of a null stand-in). If the given object is not one of these,
+ * an exception is thrown with a default message or the given optional
+ * +message+ parameter.
+ */
+function assertNull(thingie, message) {
+  var defMessage = "Expected a null object, but received <" + thingie + ">"; 
+  // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
+  assertTrue(thingie == null || thingie.toString() == "[object UIAElementNil]",
+             message ? message + ": " + defMessage : defMessage);
+}
+
+/**
  * Asserts that the given object is not null or UIAElementNil (UIAutomation's
  * version of a null stand-in). If it is null, an exception is thrown with
  * a default message or the given optional +message+ parameter
