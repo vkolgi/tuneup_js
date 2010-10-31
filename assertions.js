@@ -179,19 +179,25 @@ function assertWindow(window) {
   application = target.frontMostApp();
   mainWindow = application.mainWindow();
   
+  if (window.onPass) {
+    var onPass = window.onPass;
+    delete window.onPass;
+  }
+  
   try {
-    if (window.onPass) {
-      var onPass = window.onPass;
-      delete window.onPass;
-    }
     assertPropertiesMatch(window, mainWindow, 0);
-
-    if (onPass) {
-      onPass(mainWindow);
-    }
   }
   catch(badProp) {
     fail("Failed to match " + badProp[0] + ": " + badProp[1]);
+  }
+
+  if (onPass) {
+    try {
+      onPass(mainWindow);
+    }
+    catch(e) {
+      throw "Failed to execute 'onPass' callback: " + e;
+    }
   }
 };
 
