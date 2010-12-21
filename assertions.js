@@ -214,7 +214,7 @@ function assertPropertiesMatch(expected, given, level) {
           continue;
         }
 
-        if (!givenProp) {
+        if (givenProp == null) {
           throw propName;
         }
 
