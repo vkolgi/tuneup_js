@@ -6,6 +6,43 @@ function fail(message) {
 }
 
 /**
+ * Perform an assertion several times. If the assertion passes before the
+ * maximum number of iterations, the assertion passes. Otherwise the 
+ * assertion fails
+ * @param f The function to perform (possibly) multiple times
+ * @param maxTries The maximum number of attempts
+ * @param target The UIATarget (needed for delaying between attempts)
+ * @param delay The amount of time to pause between attempts
+ */
+function retryFunctionWithDelay(f, maxTries, target, delay) {
+  var tries = 0;
+  var exception = null;
+  while (tries < maxTries) {
+    try {
+      f();
+      return;  // if we get here, our function must have passed (no exceptions)
+    }
+    catch(e) {
+      exception = e;
+      tries++;
+      target.delay(delay);
+    }
+  }
+  throw exception;
+}
+
+/**
+ * A simplified version of 'retryFunctionWithDelay' with an implicit delay of
+ * 0.5 seconds.
+ * @param f The function to perform (possibly) multiple times
+ * @param maxTries The maximum number of attempts
+ * @param target The UIATarget (needed for delaying between attempts)
+ */
+function retryFunction(f, maxTries, target) {
+  retryFunctionWithDelay(f, maxTries, target, 0.5);
+}
+
+/**
  * Asserts that the given expression is true and throws an exception with
  * a default message, or the optional +message+ parameter
  */
