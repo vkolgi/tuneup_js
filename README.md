@@ -119,6 +119,31 @@ With `assertWindow`, you can boil it down to this:
 You can do more than just match string literals. Check out the full
 documentation in `assertions.js` for all the details.
 
+### Window Assertions for Universal Applications ###
+
+If you have a Universal Application and want to maintain a single set of test
+files, you can mark specific properties to match by adding a "~ipad" or
+"~iphone" extension to the property name. When you do this, you need to quote
+the property name instead using a literal, like so:
+
+  test("my test", function(app, target) {
+    assertWindow({
+      "navigationBar~iphone": {
+        leftButton: { name: "Back" },
+        rightButton: { name: "Done" }
+      },
+      "navigationBar~ipad": {
+        leftButton: null,
+        rightButton: { name: "Cancel" }
+      },
+    }); 
+  });
+
+Note that the "~iphone" extension should work for iPod Touch devices also.
+
+This convention is derived for how device-specific images are loaded on both
+iPad and iPhone/iPod devices. Hopefully it looks somewhat familiar.
+
 ## `UIAutomation` Extensions ##
 
 The `UIAutomation` library is pretty full-featured, but is a little wordy.

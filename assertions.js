@@ -247,6 +247,13 @@ function assertWindow(window) {
  */
 function assertPropertiesMatch(expected, given, level) {
   for (var propName in expected) {
+    if (propName.match(/~iphone$/) && UIATarget.localTarget().model().match(/^iPhone/) === null) {
+      return;
+    }
+    else if (propName.match(/~ipad$/) && UIATarget.localTarget().model().match(/^iPad/) === null) {
+      return;
+    }
+
     if (expected.hasOwnProperty(propName)) {
       try {
         var expectedProp = expected[propName];
