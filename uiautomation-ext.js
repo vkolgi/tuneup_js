@@ -58,3 +58,41 @@ extend(UIANavigationBar.prototype, {
     assertEquals(name, this.rightButton().name());
   }
 });
+
+extend(UIATarget.prototype, {
+  /**
+   * A shortcut for checking that the interface orientation in either
+   * portrait mode
+   */
+   isPortraitOrientation: function() {
+     var orientation = this.deviceOrientation();
+     return orientation == UIA_DEVICE_ORIENTATION_PORTRAIT ||
+       orientation == UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN;
+   },
+
+  /**
+   * A shortcut for checking that the interface orientation in one of the
+   * landscape orientations.
+   */
+   isLandscapeOrientation: function() {
+     var orientation = this.deviceOrientation();
+     return orientation == UIA_DEVICE_ORIENTATION_LANDSCAPELEFT ||
+       orientation == UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT;
+   },
+
+   /**
+    * A convenience method for detecting that you're running on an iPad
+    */
+    isDeviceiPad: function() {
+      return this.model().match(/^iPad/) !== null;
+    },
+
+    /**
+     * A convenience method for detecting that you're running on an
+     * iPhone or iPod touch
+     */
+    isDeviceiPhone: function() {
+      return this.model().match(/^iPhone/) !== null;
+    }
+});
+
