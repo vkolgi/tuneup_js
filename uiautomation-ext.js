@@ -40,7 +40,27 @@ extend(UIAApplication.prototype, {
       return navBar.name();
     }
     return null;
-  }
+  },
+
+  /**
+   * A shortcut for checking that the interface orientation in either
+   * portrait mode
+   */
+   isPortraitOrientation: function() {
+     var orientation = this.interfaceOrientation();
+     return orientation == UIA_DEVICE_ORIENTATION_PORTRAIT ||
+       orientation == UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN;
+   },
+
+  /**
+   * A shortcut for checking that the interface orientation in one of the
+   * landscape orientations.
+   */
+   isLandscapeOrientation: function() {
+     var orientation = this.interfaceOrientation();
+     return orientation == UIA_DEVICE_ORIENTATION_LANDSCAPELEFT ||
+       orientation == UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT;
+   }
 });
 
 extend(UIANavigationBar.prototype, {
