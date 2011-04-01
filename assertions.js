@@ -1,3 +1,7 @@
+var TuneupJS = {
+  debug: false
+};
+
 /**
  * Just flat-out fail the test with the given message
  */
@@ -237,7 +241,13 @@ function assertWindow(window) {
       throw "Failed to execute 'onPass' callback: " + e;
     }
   }
-};
+}
+
+function debugMessage(message) {
+  if (TuneupJS.debug === true) {
+    UIALogger.logMessage(message);
+  }
+}
 
 /**
  * Asserts that the +expected+ object matches the +given+ object by making
@@ -248,82 +258,115 @@ function assertWindow(window) {
  */
 function assertPropertiesMatch(expected, given, level) {
   for (var propName in expected) {
-    if (propName.match(/~iphone$/) && UIATarget.localTarget().model().match(/^iPhone/) === null) {
-      return;
-    }
-    else if (propName.match(/~ipad$/) && UIATarget.localTarget().model().match(/^iPad/) === null) {
-      return;
-    }
+    debugMessage("Attempting to match '" + propName + "'...");
+    var expectedProp = expected[propName];
 
-    if (expected.hasOwnProperty(propName)) {
-      try {
-        var expectedProp = expected[propName];
-        var givenProp = given[propName];
-
-        if (typeof(givenProp) == "function") {
-          try {
-            // We have to use eval (shudder) because calling functions on 
-            // UIAutomation objects with () operator crashes
-            // See Radar bug 8496138
-            givenProp = eval("given." + propName + "()");
-          }
-          catch (e) {
-            UIALogger.logDebug("Unable to evaluate given." + propName + "() against " + given);
-            continue;
-          }
-        }
-
-        // null indicates we don't care to match
-        if (expectedProp == null) {
-          continue;
-        }
-
-        if (givenProp == null) {
-          throw propName;
-        }
-
-        if (typeof(expectedProp) == "string") {
-          assertEquals(expectedProp, givenProp);
-        }
-        else if (typeof(expectedProp) == "number") {
-          assertEquals(expectedProp, givenProp);
-        }
-        else if (typeof(expectedProp) == "function") {
-          if (expectedProp.constructor == RegExp) {
-            assertMatch(expectedProp, givenProp);
-          }
-          else {
-            expectedProp(givenProp);
-          }
-        }
-        else if (typeof(expectedProp) == "object") {
-          if (expectedProp.constructor == Array) {
-            assertEquals(expectedProp.length, givenProp.length, "Incorrect number of elements in array");
-            for (var i = 0; i < expectedProp.length; i++) {
-              var exp = expectedProp[i];
-              var giv = givenProp[i];
-              assertPropertiesMatch(exp, giv, level + 1);
-            };
-          }
-          else if (typeof(givenProp) == "object") {
-            assertPropertiesMatch(expectedProp, givenProp, level + 1);
-          }
-          else {
-            throw propName;
-          }
-        }
+    if (propName.match(/~iphone$/)) {
+      if (UIATarget.localTarget().model().match(/^iPhone/) === null) {
+        debugMessage("[" + propName + "]: Ignoring iPhone-specific property '" +
+                     "' on " + UIATarget.localTarget().model());
+        continue;  // we're on the wrong platform, ignore
       }
-      catch(e) {
-        if (e.constructor == Array) {
-          e[0] = propName + "." + e[0];
-          throw e;
+      else {
+        propName = propName.match(/^(.*)~iphone/)[1];
+      }
+    }
+    else if (propName.match(/~ipad$/)) {
+      if (UIATarget.localTarget().model().match(/^iPad/) === null) {
+        debugMessage("[" + propName + "]: Ignoring iPad-specific property '" +
+                     "' on " + UIATarget.localTarget().model());
+        continue;  // we're on the wrong platform, ignore
+      }
+      else {
+        propName = propName.match(/^(.*)~ipad/)[1];
+      }
+    }
+
+    var givenProp = given[propName];
+
+    if (typeof(givenProp) == "function") {
+      try {
+        // We have to use eval (shudder) because calling functions on 
+        // UIAutomation objects with () operator crashes
+        // See Radar bug 8496138
+        givenProp = eval("given." + propName + "()");
+      }
+      catch (e) {
+        debugMessage("[" + propName + "]: Unable to evaluate against " + given);
+        continue;
+      }
+    }
+
+    if (givenProp === null) {
+      debugMessage("[" + propName + "]: Could not find given property");
+      throw propName;
+    }
+    else {
+      debugMessage("[" + propName + "]: givenProp = " + givenProp);
+    }
+
+    try {
+      // null indicates we don't care to match
+      if (expectedProp === null) {
+        debugMessage("[" + propName + "]: Ignoring null-match");
+        continue;
+      }
+
+      // debugMessage("[" + propName + "]: expectedProp type: " + typeof(expectedProp) +
+      //              " constructor: " + expectedProp.constructor);
+
+      if (typeof(expectedProp) == "string") {
+        debugMessage("[" + propName + "]: matching string '" + givenProp + "'");
+        assertEquals(expectedProp, givenProp);
+      }
+      else if (typeof(expectedProp) == "number") {
+        debugMessage("[" + propName + "]: matching number " + givenProp);
+        assertEquals(expectedProp, givenProp);
+      }
+      else if (typeof(expectedProp) == "function") {
+        if (expectedProp.constructor == RegExp) {
+          debugMessage("[" + propName + "]: matching RegExp " + givenProp);
+          assertMatch(expectedProp, givenProp);
         }
         else {
-          var err = [propName, e];
-          throw err;
+          debugMessage("[" + propName + "]: matching function " + givenProp);
+          expectedProp(givenProp);
         }
+      }
+      else if (typeof(expectedProp) == "object") {
+        if (expectedProp.constructor == Array) {
+          debugMessage("[" + propName + "]: matching array " + givenProp);
+          assertEquals(expectedProp.length, givenProp.length, "Incorrect number of elements in array");
+          for (var i = 0; i < expectedProp.length; i++) {
+            var exp = expectedProp[i];
+            var giv = givenProp[i];
+            assertPropertiesMatch(exp, giv, level + 1);
+          }
+        }
+        else if (typeof(givenProp) == "object") {
+          debugMessage("[" + propName + "]: matching object " + givenProp);
+          assertPropertiesMatch(expectedProp, givenProp, level + 1);
+        }
+        else {
+          debugMessage("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
+          throw propName;
+        }
+      }
+      else {
+        debugMessage("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
+      }
+    }
+    catch(e1) {
+      debugMessage("Got an exception: " + e1);
+      if (e1.constructor == Array) {
+        e1[0] = propName + "." + e1[0];
+        throw e1;
+      }
+      else {
+        var err = [propName, e1];
+        throw err;
       }
     }
   }
-};
+}
 
