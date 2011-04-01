@@ -48,7 +48,7 @@ function retryFunction(f, maxTries, target) {
  */
 function assertTrue(expression, message) {
   if (! expression) {
-    if (! message) message = "Assertion failed";
+    if (! message) { message = "Assertion failed"; }
     throw message;
   }
 }
@@ -92,7 +92,7 @@ function assertFalse(expression, message) {
 function assertNull(thingie, message) {
   var defMessage = "Expected a null object, but received <" + thingie + ">"; 
   // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
-  assertTrue(thingie == null || thingie.toString() == "[object UIAElementNil]",
+  assertTrue(thingie === null || thingie.toString() == "[object UIAElementNil]",
              message ? message + ": " + defMessage : defMessage);
 }
 
@@ -105,7 +105,7 @@ function assertNull(thingie, message) {
 function assertNull(thingie, message) {
   var defMessage = "Expected a null object, but received <" + thingie + ">"; 
   // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
-  assertTrue(thingie == null || thingie.toString() == "[object UIAElementNil]",
+  assertTrue(thingie === null || thingie.toString() == "[object UIAElementNil]",
              message ? message + ": " + defMessage : defMessage);
 }
 
@@ -116,7 +116,7 @@ function assertNull(thingie, message) {
  */
 function assertNotNull(thingie, message) {
   var defMessage = "Expected not null object";
-  assertTrue(thingie != null && thingie.toString() != "[object UIAElementNil]", 
+  assertTrue(thingie !== null && thingie.toString() != "[object UIAElementNil]", 
              message ? message + ": " + defMessage : defMessage);
 }
 
@@ -215,12 +215,13 @@ function assertWindow(window) {
   target = UIATarget.localTarget();
   application = target.frontMostApp();
   mainWindow = application.mainWindow();
-  
+
+  var onPass = null;
   if (window.onPass) {
-    var onPass = window.onPass;
+    onPass = window.onPass;
     delete window.onPass;
   }
-  
+
   try {
     assertPropertiesMatch(window, mainWindow, 0);
   }
