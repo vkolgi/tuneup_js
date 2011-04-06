@@ -14,11 +14,16 @@ function fail(message) {
  * maximum number of iterations, the assertion passes. Otherwise the 
  * assertion fails
  * @param f The function to perform (possibly) multiple times
- * @param maxTries The maximum number of attempts
- * @param target The UIATarget (needed for delaying between attempts)
- * @param delay The amount of time to pause between attempts
+ * @param maxTries (optional) The maximum number of attempts
+ * @param delay (optional) The amount of time to pause between attempts
  */
-function retryFunctionWithDelay(f, maxTries, target, delay) {
+function retry() {
+  var f = arguments[0];
+  var maxTries = 3;
+  var delay = 0.5;
+  if (arguments.length > 1) { maxTries = arguments[1]; }
+  if (arguments.length > 2) { delay = arguments[2]; }
+
   var tries = 0;
   var exception = null;
   while (tries < maxTries) {
@@ -29,21 +34,10 @@ function retryFunctionWithDelay(f, maxTries, target, delay) {
     catch(e) {
       exception = e;
       tries++;
-      target.delay(delay);
+      UIATarget.localTarget().delay(delay);
     }
   }
   throw exception;
-}
-
-/**
- * A simplified version of 'retryFunctionWithDelay' with an implicit delay of
- * 0.5 seconds.
- * @param f The function to perform (possibly) multiple times
- * @param maxTries The maximum number of attempts
- * @param target The UIATarget (needed for delaying between attempts)
- */
-function retryFunction(f, maxTries, target) {
-  retryFunctionWithDelay(f, maxTries, target, 0.5);
 }
 
 /**
