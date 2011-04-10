@@ -1,7 +1,3 @@
-var TuneupJS = {
-  debug: false
-};
-
 /**
  * Just flat-out fail the test with the given message
  */
@@ -79,19 +75,6 @@ function assertEquals(expected, received, message) {
  */
 function assertFalse(expression, message) {
   assertTrue(! expression, message);
-}
-
-/**
- * Asserts that the given object is null or UIAElementNil (UIAutomation's
- * version of a null stand-in). If the given object is not one of these,
- * an exception is thrown with a default message or the given optional
- * +message+ parameter.
- */
-function assertNull(thingie, message) {
-  var defMessage = "Expected a null object, but received <" + thingie + ">"; 
-  // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
-  assertTrue(thingie === null || thingie.toString() == "[object UIAElementNil]",
-             message ? message + ": " + defMessage : defMessage);
 }
 
 /**
@@ -237,12 +220,6 @@ function assertWindow(window) {
   }
 }
 
-function debugMessage(message) {
-  if (TuneupJS.debug === true) {
-    UIALogger.logMessage(message);
-  }
-}
-
 /**
  * Asserts that the +expected+ object matches the +given+ object by making
  * assertions appropriate based on the type of each property in the 
@@ -253,13 +230,10 @@ function debugMessage(message) {
 function assertPropertiesMatch(expected, given, level) {
   for (var propName in expected) {
     if (expected.hasOwnProperty(propName)) {
-      debugMessage("Attempting to match '" + propName + "'...");
       var expectedProp = expected[propName];
 
       if (propName.match(/~iphone$/)) {
         if (UIATarget.localTarget().model().match(/^iPhone/) === null) {
-          debugMessage("[" + propName + "]: Ignoring iPhone-specific property '" +
-                       "' on " + UIATarget.localTarget().model());
           continue;  // we're on the wrong platform, ignore
         }
         else {
@@ -268,8 +242,6 @@ function assertPropertiesMatch(expected, given, level) {
       }
       else if (propName.match(/~ipad$/)) {
         if (UIATarget.localTarget().model().match(/^iPad/) === null) {
-          debugMessage("[" + propName + "]: Ignoring iPad-specific property '" +
-                       "' on " + UIATarget.localTarget().model());
           continue;  // we're on the wrong platform, ignore
         }
         else {
@@ -287,72 +259,59 @@ function assertPropertiesMatch(expected, given, level) {
           givenProp = eval("given." + propName + "()");
         }
         catch (e) {
-          debugMessage("[" + propName + "]: Unable to evaluate against " + given);
+          UIALogger.logError("[" + propName + "]: Unable to evaluate against " + given);
           continue;
         }
       }
 
       if (givenProp === null) {
-        debugMessage("[" + propName + "]: Could not find given property");
-        throw propName;
-      }
-      else {
-        debugMessage("[" + propName + "]: givenProp = " + givenProp);
+        throw "Could not find given propery named: " + propName;
       }
 
       try {
         // null indicates we don't care to match
         if (expectedProp === null) {
-          debugMessage("[" + propName + "]: Ignoring null-match");
           continue;
         }
 
-        // debugMessage("[" + propName + "]: expectedProp type: " + typeof(expectedProp) +
-        //              " constructor: " + expectedProp.constructor);
-
-        if (typeof(expectedProp) == "string") {
-          debugMessage("[" + propName + "]: matching string '" + givenProp + "'");
+        var expectedPropType = typeof(expectedProp);
+        if (expectedPropType == "string") {
           assertEquals(expectedProp, givenProp);
         }
-        else if (typeof(expectedProp) == "number") {
-          debugMessage("[" + propName + "]: matching number " + givenProp);
+        else if (expectedPropType == "number") {
           assertEquals(expectedProp, givenProp);
         }
-        else if (typeof(expectedProp) == "function") {
+        else if (expectedPropType == "function") {
           if (expectedProp.constructor == RegExp) {
-            debugMessage("[" + propName + "]: matching RegExp " + givenProp);
             assertMatch(expectedProp, givenProp);
           }
           else {
-            debugMessage("[" + propName + "]: matching function " + givenProp);
             expectedProp(givenProp);
           }
         }
-        else if (typeof(expectedProp) == "object") {
-          if (expectedProp.constructor == Array) {
-            debugMessage("[" + propName + "]: matching array " + givenProp);
-            assertEquals(expectedProp.length, givenProp.length, "Incorrect number of elements in array");
-            for (var i = 0; i < expectedProp.length; i++) {
+        else if (expectedPropType == "object") {
+          if (expectedProp.constructor === Array) {
+            var expectedPropLength = expectedProp.length;
+            for (var i = 0; i < expectedPropLength; i++) {
               var exp = expectedProp[i];
               var giv = givenProp[i];
               assertPropertiesMatch(exp, giv, level + 1);
             }
           }
           else if (typeof(givenProp) == "object") {
-            debugMessage("[" + propName + "]: matching object " + givenProp);
             assertPropertiesMatch(expectedProp, givenProp, level + 1);
           }
           else {
-            debugMessage("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
+            UIALogger.logError("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
             throw propName;
           }
         }
         else {
-          debugMessage("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
+          UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
         }
       }
       catch(e1) {
-        debugMessage("Got an exception: " + e1);
+        UIALogger.logError("Got an exception: " + e1);
         if (e1.constructor == Array) {
           e1[0] = propName + "." + e1[0];
           throw e1;
