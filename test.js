@@ -16,6 +16,7 @@
  *
  */
 function test(title, f, options) {
+  var result = new Boolean();
   if (options == null) {
     options = {
       logTree: true
@@ -23,14 +24,15 @@ function test(title, f, options) {
   }
   target = UIATarget.localTarget();
   application = target.frontMostApp();
-  UIALogger.logStart(title);
   try {
     f(target, application);
-    UIALogger.logPass(title);
+    UIALogger.logMessage(title);
+    result = true;
   }
   catch (e) {
     UIALogger.logError(e);
     if (options.logTree) target.logElementTree();
-    UIALogger.logFail(title);
+    result = false;
   }
+  return result;
 }

@@ -3,3 +3,4 @@
 #import "lang-ext.js"
 #import "screen.js"
 #import "test.js"
+#import "suite.js"
