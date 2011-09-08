@@ -20,6 +20,35 @@ extend(UIATableView.prototype, {
 });
 
 extend(UIAElement.prototype, {
+	// Poll till the item becomes visible, up to a specified timeout
+	waitForVisible: function (timeout, step)
+	{
+	        if (step == null)
+	        {
+	                step = 0.5;
+	        }
+
+	        var stop = timeout/step;
+
+	        for (var i = 0; i < stop; i++)
+	        {
+	                UIATarget.localTarget().delay(step); // for the animation
+	                if (this.isVisible())
+	                {
+	                        return;
+	                }
+	        }
+	        this.logElement();
+	        throw("Not visible");
+	},
+	
+	/**
+   * A shortcut for waiting an element to become visible and tap.
+   */
+  vtap: function() {
+    this.waitForVisible(5, 0.25);
+    this.tap();
+  },
   /**
    * A shortcut for touching an element and waiting for it to disappear.
    */
