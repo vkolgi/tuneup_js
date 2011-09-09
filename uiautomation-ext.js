@@ -172,7 +172,9 @@ TODO: Character keyboard is super slow.
 */
 var typeString = function(pstrString, pbClear)
 {
-    if (!this.hasKeyboardFocus())
+	pstrString += ''; // convert number to string 
+	
+	if (!this.hasKeyboardFocus())
         this.tap();
 
     UIATarget.localTarget().delay(0.5);
