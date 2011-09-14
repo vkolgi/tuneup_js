@@ -95,26 +95,26 @@ to do something like this:
 
 With `assertWindow`, you can boil it down to this:
 
-  test("my test", function(app, target) {
-    assertWindow({
-      navigationBar: {
-        leftButton: { name: "Back" },
-        rightButton: { name: "Done" }
-      },
-      tableViews: [
-        {
-          groups: [
-            { name: "First Name" },
-            { name: "Last Name" }
-          ],
-          cells: [
-            { name: "Fred" },
-            { name: "Flintstone" }
-          ]
-        }
-      ]
-    }); 
-  });
+    test("my test", function(app, target) {
+      assertWindow({
+        navigationBar: {
+          leftButton: { name: "Back" },
+          rightButton: { name: "Done" }
+        },
+        tableViews: [
+          {
+            groups: [
+              { name: "First Name" },
+              { name: "Last Name" }
+            ],
+            cells: [
+              { name: "Fred" },
+              { name: "Flintstone" }
+            ]
+          }
+        ]
+      }); 
+    });
 
 You can do more than just match string literals. Check out the full
 documentation in `assertions.js` for all the details.
