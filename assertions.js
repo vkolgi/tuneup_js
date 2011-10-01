@@ -265,7 +265,7 @@ function assertPropertiesMatch(expected, given, level) {
       }
 
       if (givenProp === null) {
-        throw "Could not find given propery named: " + propName;
+        throw "Could not find given " + given + " property named: " + propName;
       }
 
       try {
