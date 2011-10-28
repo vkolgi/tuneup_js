@@ -73,25 +73,25 @@ The full details are documented in `assertions.js`, but here's a taste of what
 this assertion can do for your tests. Prior to `assertWindow` you would have
 to do something like this:
 
-  test("my test", function(app, target) {
-    mainWindow = app.mainWindow();
-    navBar = mainWindow.navigationBar();
-    leftButton = navBar.leftButton();
-    rightButton = navBar.rightButton();
-
-    assertEquals("Back", leftButton.name());
-    assertEquals("Done", rightButton.name());
-
-    tableViews = mainWindow.tableViews();
-    assertEquals(1, tableViews.length);
-    table = tableViews[0];
-
-    assertEquals("First Name", table.groups()[0].staticTexts()[0].name());
-    assertEquals("Last Name", table.groups()[1].staticTexts()[0].name());
-
-    assertEquals("Fred", table.cells()[0].name());
-    assertEquals("Flintstone", table.cells()[1].name());
-  });
+    test("my test", function(app, target) {
+      mainWindow = app.mainWindow();
+      navBar = mainWindow.navigationBar();
+      leftButton = navBar.leftButton();
+      rightButton = navBar.rightButton();
+  
+      assertEquals("Back", leftButton.name());
+      assertEquals("Done", rightButton.name());
+  
+      tableViews = mainWindow.tableViews();
+      assertEquals(1, tableViews.length);
+      table = tableViews[0];
+  
+      assertEquals("First Name", table.groups()[0].staticTexts()[0].name());
+      assertEquals("Last Name", table.groups()[1].staticTexts()[0].name());
+  
+      assertEquals("Fred", table.cells()[0].name());
+      assertEquals("Flintstone", table.cells()[1].name());
+    });
 
 With `assertWindow`, you can boil it down to this:
 
@@ -126,18 +126,18 @@ files, you can mark specific properties to match by adding a "~ipad" or
 "~iphone" extension to the property name. When you do this, you need to quote
 the property name instead using a literal, like so:
 
-  test("my test", function(app, target) {
-    assertWindow({
-      "navigationBar~iphone": {
-        leftButton: { name: "Back" },
-        rightButton: { name: "Done" }
-      },
-      "navigationBar~ipad": {
-        leftButton: null,
-        rightButton: { name: "Cancel" }
-      },
-    }); 
-  });
+    test("my test", function(app, target) {
+      assertWindow({
+        "navigationBar~iphone": {
+          leftButton: { name: "Back" },
+          rightButton: { name: "Done" }
+        },
+        "navigationBar~ipad": {
+          leftButton: null,
+          rightButton: { name: "Cancel" }
+        },
+      }); 
+    });
 
 Note that the "~iphone" extension should work for iPod Touch devices also.
 
