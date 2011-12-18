@@ -298,6 +298,9 @@ function assertPropertiesMatch(expected, given, level) {
               assertPropertiesMatch(exp, giv, level + 1);
             }
           }
+          else if (expectedProp.constructor === RegExp) {
+            assertMatch(expectedProp, givenProp);
+          }
           else if (typeof(givenProp) == "object") {
             assertPropertiesMatch(expectedProp, givenProp, level + 1);
           }
