@@ -73,7 +73,7 @@ The full details are documented in `assertions.js`, but here's a taste of what
 this assertion can do for your tests. Prior to `assertWindow` you would have
 to do something like this:
 
-    test("my test", function(app, target) {
+    test("my test", function(target, app) {
       mainWindow = app.mainWindow();
       navBar = mainWindow.navigationBar();
       leftButton = navBar.leftButton();
@@ -95,7 +95,7 @@ to do something like this:
 
 With `assertWindow`, you can boil it down to this:
 
-    test("my test", function(app, target) {
+    test("my test", function(target, app) {
       assertWindow({
         navigationBar: {
           leftButton: { name: "Back" },
@@ -126,7 +126,7 @@ files, you can mark specific properties to match by adding a "~ipad" or
 "~iphone" extension to the property name. When you do this, you need to quote
 the property name instead using a literal, like so:
 
-    test("my test", function(app, target) {
+    test("my test", function(target, app) {
       assertWindow({
         "navigationBar~iphone": {
           leftButton: { name: "Back" },
