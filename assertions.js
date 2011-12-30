@@ -102,6 +102,39 @@ function assertNotNull(thingie, message) {
 }
 
 /**
+ * Assert that the given definition matches the given element. The
+ * definition is a JavaScript object whose property hierarchy matches
+ * the given UIAElement.  Property names in the given definition that match a
+ * method will cause that method to be invoked and the matching to be performed
+ * and the result. For example, the UITableView exposes all UITableViewCells through
+ * the cells() method. You only need to specify a 'cells' property to
+ * cause the method to be invoked.
+ */
+function assertElementTree(element, definition) {
+  var onPass = null;
+  if (definition.onPass) {
+    onPass = definition.onPass;
+    delete definition.onPass;
+  }
+
+  try {
+    assertPropertiesMatch(definition, element, 0);
+  }
+  catch(badProp) {
+    fail("Failed to match " + badProp[0] + ": " + badProp[1]);
+  }
+
+  if (onPass) {
+    try {
+      onPass(element);
+    }
+    catch(e) {
+      throw "Failed to execute 'onPass' callback: " + e;
+    }
+  }
+}
+
+/**
  * Assert that the given window definition matches the current main window. The
  * window definition is a JavaScript object whose property hierarchy matches
  * the main UIAWindow.  Property names in the given definition that match a
@@ -197,27 +230,7 @@ function assertWindow(window) {
   application = target.frontMostApp();
   mainWindow = application.mainWindow();
 
-  var onPass = null;
-  if (window.onPass) {
-    onPass = window.onPass;
-    delete window.onPass;
-  }
-
-  try {
-    assertPropertiesMatch(window, mainWindow, 0);
-  }
-  catch(badProp) {
-    fail("Failed to match " + badProp[0] + ": " + badProp[1]);
-  }
-
-  if (onPass) {
-    try {
-      onPass(mainWindow);
-    }
-    catch(e) {
-      throw "Failed to execute 'onPass' callback: " + e;
-    }
-  }
+  assertElementTree(mainWindow, window)
 }
 
 /**
