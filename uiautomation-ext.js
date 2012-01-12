@@ -20,33 +20,48 @@ extend(UIATableView.prototype, {
 });
 
 extend(UIAElement.prototype, {
-	// Poll till the item becomes visible, up to a specified timeout
-	waitForVisible: function (timeout, step)
+	/*
+		Wait until element becomes visible
+	*/
+	waitToBecomeVisible: function (timeoutInSeconds)
 	{
-	        if (step == null)
-	        {
-	                step = 0.5;
-	        }
+	   	this._waitForExpressionToBecomeTrue("this.isVisible()", timeoutInSeconds, "Element didn't become visible.");
+	},
 
-	        var stop = timeout/step;
+	/*
+		Wait until element becomes invisible
+	*/	
+	waitToBecomeInvisible: function (timeoutInSeconds)
+	{
+		this._waitForExpressionToBecomeTrue("!this.isVisible()", timeoutInSeconds, "Element didn't become invisible.");
+	},
+	
+	/*
+		Helper method to wait for expression to become true, otherwise an error is thrown
+	*/
+	_waitForExpressionToBecomeTrue: function(exp, timeoutInSeconds, errorMessage) {
+        step = 0.5;
+		if(errorMessage == null){
+			errorMessage = "Calling " + exp + " results in " + eval(exp);
+		}
 
-	        for (var i = 0; i < stop; i++)
-	        {
-	                UIATarget.localTarget().delay(step); // for the animation
-	                if (this.isVisible())
-	                {
-	                        return;
-	                }
-	        }
-	        this.logElement();
-	        throw("Not visible");
+        var stop = timeoutInSeconds/step;
+        for (var i = 0; i < stop; i++)
+        {
+                UIATarget.localTarget().delay(step); // for the animation
+                if( eval(exp) ) {
+                        return;
+                }
+        }
+        this.logElement();
+        throw(errorMessage);
 	},
 	
 	/**
    * A shortcut for waiting an element to become visible and tap.
    */
   vtap: function() {
-    this.waitForVisible(10, 0.25);
+    this.waitToBecomeVisible(5);
     this.tap();
   },
   /**
