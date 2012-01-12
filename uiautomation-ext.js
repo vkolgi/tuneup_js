@@ -26,7 +26,13 @@ extend(UIAElement.prototype, {
 	waitUntilVisible: function (timeoutInSeconds)
 	{
 		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
-	   	this._waitForExpressionToBecomeTrue("this.isVisible()", timeoutInSeconds, "Element didn't become visible.");
+		var element = this;
+
+		retryWithTimeout(function() { 
+			if(!element.isVisible()) {
+				throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
+			}
+		}, timeoutInSeconds);
 	},
 
 	/*
@@ -35,30 +41,15 @@ extend(UIAElement.prototype, {
 	waitUntilInvisible: function (timeoutInSeconds)
 	{
 		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
-		this._waitForExpressionToBecomeTrue("!this.isVisible()", timeoutInSeconds, "Element didn't become invisible.");
-	},
-	
-	/*
-		Helper method to wait for expression to become true, otherwise an error is thrown
-	*/
-	_waitForExpressionToBecomeTrue: function(exp, timeoutInSeconds, errorMessage) {
-        step = 0.5;
-		if(errorMessage == null){
-			errorMessage = "Calling " + exp + " results in " + eval(exp);
-		}
+		var element = this;
 
-        var stop = timeoutInSeconds/step;
-        for (var i = 0; i < stop; i++)
-        {
-                UIATarget.localTarget().delay(step); // for the animation
-                if( eval(exp) ) {
-                        return;
-                }
-        }
-        this.logElement();
-        throw(errorMessage);
+		retryWithTimeout(function() { 
+			if(element.isVisible()) {
+				throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
+			}
+		}, timeoutInSeconds);
 	},
-	
+		
 	/**
    * A shortcut for waiting an element to become visible and tap.
    */
