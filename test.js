@@ -34,3 +34,10 @@ function test(title, f, options) {
     UIALogger.logFail(title);
   }
 }
+
+/*
+ * Log function
+ */
+log = function(str) {
+  	UIALogger.logDebug(str);
+}
