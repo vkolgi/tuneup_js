@@ -23,7 +23,7 @@ extend(UIAElement.prototype, {
 	/*
 		Wait until element becomes visible
 	*/
-	waitToBecomeVisible: function (timeoutInSeconds)
+	waitUntilVisible: function (timeoutInSeconds)
 	{
 	   	this._waitForExpressionToBecomeTrue("this.isVisible()", timeoutInSeconds, "Element didn't become visible.");
 	},
@@ -31,7 +31,7 @@ extend(UIAElement.prototype, {
 	/*
 		Wait until element becomes invisible
 	*/	
-	waitToBecomeInvisible: function (timeoutInSeconds)
+	waitUntilInvisible: function (timeoutInSeconds)
 	{
 		this._waitForExpressionToBecomeTrue("!this.isVisible()", timeoutInSeconds, "Element didn't become invisible.");
 	},
@@ -61,7 +61,7 @@ extend(UIAElement.prototype, {
    * A shortcut for waiting an element to become visible and tap.
    */
   vtap: function() {
-    this.waitToBecomeVisible(5);
+    this.waitUntilVisible(5);
     this.tap();
   },
   /**
