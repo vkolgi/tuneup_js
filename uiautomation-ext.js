@@ -25,6 +25,7 @@ extend(UIAElement.prototype, {
 	*/
 	waitUntilVisible: function (timeoutInSeconds)
 	{
+		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
 	   	this._waitForExpressionToBecomeTrue("this.isVisible()", timeoutInSeconds, "Element didn't become visible.");
 	},
 
@@ -33,6 +34,7 @@ extend(UIAElement.prototype, {
 	*/	
 	waitUntilInvisible: function (timeoutInSeconds)
 	{
+		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
 		this._waitForExpressionToBecomeTrue("!this.isVisible()", timeoutInSeconds, "Element didn't become invisible.");
 	},
 	
