@@ -29,7 +29,7 @@ function test(title, f, options) {
     UIALogger.logPass(title);
   }
   catch (e) {
-    UIALogger.logError(e);
+    UIALogger.logError(e.toString());
     if (options.logTree) target.logElementTree();
     UIALogger.logFail(title);
   }
