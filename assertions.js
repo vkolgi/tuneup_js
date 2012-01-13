@@ -35,15 +35,6 @@ function retry() {
   }
   throw exception;
 }
-/*
- * Wrapper method for retry()
- */
-function retryWithTimeout(func, timeoutInSeconds) {
-	timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
-	var delay = 0.25;
-	
-	retry(func, timeoutInSeconds/delay, delay);
-}
 
 /**
  * Asserts that the given expression is true and throws an exception with

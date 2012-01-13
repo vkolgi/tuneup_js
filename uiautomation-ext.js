@@ -27,12 +27,12 @@ extend(UIAElement.prototype, {
 	{
 		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
 		var element = this;
-
-		retryWithTimeout(function() { 
+		var delay = 0.25;
+		retry(function() { 
 			if(!element.isVisible()) {
 				throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
 			}
-		}, timeoutInSeconds);
+		}, timeoutInSeconds/delay, delay);
 	},
 
 	/*
@@ -42,12 +42,12 @@ extend(UIAElement.prototype, {
 	{
 		timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
 		var element = this;
-
-		retryWithTimeout(function() { 
+		var delay = 0.25;
+		retry(function() { 
 			if(element.isVisible()) {
 				throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
 			}
-		}, timeoutInSeconds);
+		}, timeoutInSeconds/delay, delay);
 	},
 		
 	/**
