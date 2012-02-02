@@ -28,7 +28,7 @@ extend(UIAElement.prototype, {
 		var delay = 0.25;
 		retry(function() { 
 			if(!element.isVisible()) {
-				throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
+				throw("Element (" +  element + ") didn't become visible within " + timeoutInSeconds + " seconds.");
 			}
 		}, timeoutInSeconds/delay, delay);
 	},
