@@ -266,9 +266,6 @@ extend(UIAPickerWheel.prototype, {
    scrollToValue: function (valueToSelect) {
    
       var element = this;      
-      
-      // element.logElementTree();
-      
       var values = this.values();
       var pickerValue = element.value();
       
@@ -283,22 +280,14 @@ extend(UIAPickerWheel.prototype, {
       } else {
         var currentValue = element.value();
       }
-      
-      // DEBUGGING info
-      //UIALogger.logDebug("currentValue: " + currentValue);
-      //UIALogger.logDebug("all Values: " + values);
-      
+            
       var currentValueIndex = values.indexOf(currentValue);
       var valueToSelectIndex = values.indexOf(valueToSelect);
       
       if (valueToSelectIndex == -1) {
         fail("value: " + valueToSelect + " not found in Wheel!");
       }
-      
-      // DEBUGGING info
-      //UIALogger.logDebug("index1: " + currentValueIndex);
-      //UIALogger.logDebug("index2: " + valueToSelectIndex);
-      
+    
       var elementsToScroll = valueToSelectIndex - currentValueIndex;
       
       UIALogger.logDebug("number of elements to scroll: " + elementsToScroll);
