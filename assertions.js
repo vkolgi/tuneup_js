@@ -70,6 +70,16 @@ function assertEquals(expected, received, message) {
 }
 
 /**
+ * Assert that the +received+ object does not matches the +expected+ object (using
+ * plain ol' !=). If it doesn't, this method throws an exception with either
+ * a default message, or the one given as the last (optional) argument
+ */
+function assertNotEquals(expected, received, message) {
+    var defMessage = "Expected not <" + expected + "> but received <" + received + ">";
+    assertTrue(expected != received, message ? message + ": " + defMessage : defMessage);
+}
+
+/**
  * Asserts that the given expression is false and otherwise throws an 
  * exception with a default message, or the optional +message+ parameter
  */
