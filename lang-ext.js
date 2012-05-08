@@ -25,29 +25,6 @@ function dumpProperties(obj) {
 
 extend(Array.prototype, {
   /**
-  * Performs the given function +f+ on each element in the array instance.
-  * The function is given the index of the current object and the object
-  * itself for each element in the array.
-  */
-  each: function(f) {
-    for (i = 0; i < this.length; i++) {
-      f(i, this[i]);
-    }
-  },
-
-  /**
-   * Constructs a new array by applying the given function to each element
-   * of this array.
-   */
-  map: function(f) {
-    result = [];
-    this.each(function(i,e) {
-      result.push(f(i, e));
-    });
-    return result;
-  },
-
-  /**
    * Applies the given function to each element in the array until a
    * match is made. Otherwise returns null.
    * */
