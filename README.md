@@ -152,6 +152,38 @@ an attempt to cut down on the verbosity of your tests.
 
 See the `uiautomation-ext.js` for details.
 
+# Running Tests
+
+Starting in iOS 5, Apple provided a way to run Instruments from the 
+command-line. However, it's a bit fiddly and is very general-purpose
+so doing anything _useful_ with the output is kind of a pain.
+
+Tuneup now provides a Ruby script (run-test) to run your test scripts.
+The runner will parse the output of your test and produce a proper
+UNIX exit code based on whether or not your tests succeeded. It also
+provides some niceties like automatically specifying the full-path
+to your test script if you don't provide one.
+
+To use the runner, invoke it like so:
+
+    [path to tuneup]/run-test <app bundle> <test script> <output directory> [device_id]
+
+The `<app bundle>` argument is the name of your app (*.app for a real
+device, or the crazy path to the build bundle for the simulator). The
+`<test script>` argument specifies the JavaScript test file and the
+`<output directory>` is where the resulting Instruments output should
+go.
+
+If you provide the optional fourth argument, `device_id`, you can tell
+Instruments to run your test against a real device (identified by
+UDID). If this argument is not provided, the runner will assume you are
+running against the simulator.
+
+*NOTE*: If you are running tests with the simulator you need to provide
+a _fully-qualified_ path to the app bundle, which will be buried
+somewhere in `~/Library/Developer/Xcode/DerivedData`. For tests that
+execute against a real device, the name of the app bundle will suffice.
+
 # Note on Patches/Pull Requests #
  
   * Fork the project.
