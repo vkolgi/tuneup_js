@@ -1,15 +1,34 @@
 #!/usr/bin/env ruby -wKU
 
 require "fileutils"
+require "optparse"
+require "ostruct"
 require "pty"
 
+options = OpenStruct.new
+options.env_vars = {}
+
+opts_parser = OptionParser.new do |opts|
+  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [device_id] [pass-through args...]"
+
+  opts.on("-d", "--device [DEVICE]", "Device UDID to run test against") do |dev|
+    options.device = dev
+  end
+
+  opts.on("-e", "--environment [ENV]") do |env|
+    key, value = env.split '='
+    options.env_vars[key] = value
+  end
+end
+
 unless ARGV.length >= 3
-  STDERR.puts "USAGE: run-test-script <app bundle> <test script> <output directory> [device_id]"
-  STDERR.puts "NB: If no device_id is specified, the test will be run using the iOS Simulator"
+  opts_parser.help
   exit 1
 end
 
-app_bundle, test_script, test_output, device_id = *ARGV
+app_bundle, test_script, test_output = ARGV.shift 3
+
+opts_parser.parse!
 
 # Instruments wants the test_script to be a fully-qualified path
 unless test_script[0] == "/"
@@ -19,11 +38,14 @@ end
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 
 command = ["/usr/bin/instruments"] 
-command << "-w #{device_id}" unless device_id.nil?
+command << "-w #{options.device}" if options.device
 command << "-t #{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
 command << app_bundle 
 command << "-e UIASCRIPT #{test_script}"
 command << "-e UIARESULTSPATH #{test_output}"
+options.env_vars.to_a.each do |pair|
+  command << "-e #{pair.join ' '}"
+end
 puts "command=#{command.join ' '}"
 
 failed = false
