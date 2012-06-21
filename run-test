@@ -9,20 +9,20 @@ options = OpenStruct.new
 options.env_vars = {}
 
 opts_parser = OptionParser.new do |opts|
-  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [device_id] [pass-through args...]"
+  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]"
 
   opts.on("-d", "--device [DEVICE]", "Device UDID to run test against") do |dev|
     options.device = dev
   end
 
-  opts.on("-e", "--environment [ENV]") do |env|
+  opts.on("-e", "--environment [ENV]", "Pass variables in the form of name=value") do |env|
     key, value = env.split '='
     options.env_vars[key] = value
   end
 end
 
 unless ARGV.length >= 3
-  opts_parser.help
+  STDERR.puts opts_parser.help
   exit 1
 end
 
