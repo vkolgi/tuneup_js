@@ -139,7 +139,9 @@ extend(UIATarget.prototype, {
     * A convenience method for detecting that you're running on an iPad
     */
     isDeviceiPad: function() {
-      return this.model().match(/^iPad/) !== null;
+      //model is iPhone Simulator, even when running in iPad mode
+      return this.model().match(/^iPad/) !== null ||
+        this.name().match(/iPad Simulator/) !== null;
     },
 
     /**
@@ -147,7 +149,8 @@ extend(UIATarget.prototype, {
      * iPhone or iPod touch
      */
     isDeviceiPhone: function() {
-      return this.model().match(/^iPhone/) !== null;
+      return this.model().match(/^iPad/) === null &&
+        this.name().match(/^iPad Simulator$/) === null;
     }
 });
 extend(UIAKeyboard.prototype,{
