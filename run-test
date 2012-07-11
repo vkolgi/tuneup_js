@@ -39,7 +39,7 @@ SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split
 
 command = ["/usr/bin/instruments"] 
 command << "-w #{options.device}" if options.device
-command << "-t #{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+command << "-t #{SDKROOT}/../../../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
 command << app_bundle 
 command << "-e UIASCRIPT #{test_script}"
 command << "-e UIARESULTSPATH #{test_output}"
