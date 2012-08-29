@@ -48,7 +48,7 @@ options.env_vars.to_a.each do |pair|
   command << "-e"
   command.concat(pair)
 end
-puts "command=#{command.join ' '}"
+puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ')
 
 failed = false
 
