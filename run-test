@@ -30,10 +30,11 @@ app_bundle, test_script, test_output = ARGV.shift 3
 
 opts_parser.parse!
 
-# Instruments wants the test_script to be a fully-qualified path
-unless test_script[0] == "/"[0]
-  test_script = "#{Dir.pwd}/#{test_script}"
-end
+# Instruments wants the test_script and app_bundle to be a fully-qualified path
+test_script = File.expand_path(test_script)
+raise "Test script '#{test_script}' doesn't exist" unless File.exist?(test_script)
+app_bundle = File.expand_path(app_bundle)
+raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bundle)
 
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 
