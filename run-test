@@ -30,23 +30,25 @@ app_bundle, test_script, test_output = ARGV.shift 3
 
 opts_parser.parse!
 
-# Instruments wants the test_script to be a fully-qualified path
-unless test_script[0] == "/"
-  test_script = "#{Dir.pwd}/#{test_script}"
-end
+# Instruments wants the test_script and app_bundle to be a fully-qualified path
+test_script = File.expand_path(test_script)
+raise "Test script '#{test_script}' doesn't exist" unless File.exist?(test_script)
+app_bundle = File.expand_path(app_bundle)
+raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bundle)
 
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 
-command = ["/usr/bin/instruments"] 
-command << "-w #{options.device}" if options.device
-command << "-t #{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
-command << app_bundle 
-command << "-e UIASCRIPT #{test_script}"
-command << "-e UIARESULTSPATH #{test_output}"
+command = ["/usr/bin/instruments"]
+command << "-w" << options.device if options.device
+command << "-t" << "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+command << app_bundle
+command << "-e" << "UIASCRIPT" << test_script
+command << "-e" << "UIARESULTSPATH" << test_output
 options.env_vars.to_a.each do |pair|
-  command << "-e #{pair.join ' '}"
+  command << "-e"
+  command.concat(pair)
 end
-puts "command=#{command.join ' '}"
+puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ')
 
 failed = false
 
@@ -56,7 +58,7 @@ end
 
 Dir.chdir(test_output) do
   begin
-    PTY.spawn(command.join ' ') do |r, w, pid|
+    PTY.spawn(*command) do |r, w, pid|
       r.each do |line|
         puts line
         _, date, time, tz, type, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
@@ -66,10 +68,10 @@ Dir.chdir(test_output) do
           failed = true
         end
       end
-    end     
+    end
   rescue Errno::EIO
   rescue PTY::ChildExited => e
-    STDERR.puts "Instruments exited unexpectedly" 
+    STDERR.puts "Instruments exited unexpectedly"
     exit 1
   end
 
