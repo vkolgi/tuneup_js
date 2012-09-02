@@ -9,7 +9,8 @@ options = OpenStruct.new
 options.env_vars = {}
 
 opts_parser = OptionParser.new do |opts|
-  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]"
+  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]" +
+    "\n  If <app bundle> is the name of the app without extension, the newest bundle is located autmatically"
 
   opts.on("-d", "--device DEVICE", "Device UDID to run test against,",
           "or 'dynamic' to find the UDID at runtime") do |dev|
@@ -73,6 +74,29 @@ instrument_pids = `/usr/bin/pgrep -i '^instruments$'`
 if $? == 0 then
   warn "\n### There are other 'instrument' processes running that may interfere - consider terminating them first:\nkill -9 " +
     instrument_pids.gsub(/\s+/, " ")
+end
+
+# Find the bundle path at runtime
+# Discussion: better to have a command line option for app_name,
+# than using a "bare" app_bundle to specify app_name?
+app_name = File.basename(app_bundle, ".*")
+if app_bundle == app_name then
+  # List existing bundles, newest first
+  mdargs = 'kMDItemDisplayName == "' + app_name + '.app" || ' +
+    'kMDItemAlternateNames == "' + app_name + '.app"'
+  bundle_paths = `mdfind -0 '#{mdargs}' | xargs -0 ls -dt`.split(/\n/)
+  if options.device
+    bundles = bundle_paths.grep(/\/(Debug|Release)-iphoneos\//)
+  else
+    bundles = bundle_paths.grep(/\/iPhone Simulator\/|\/(Debug|Release)-iphonesimulator\//)
+  end
+  if bundles.size > 0
+    app_bundle = bundles[0]
+    puts "Found relevant bundles (newest first):", bundles, "\n" if options.verbose
+  else
+    STDERR.puts "Matching but irrelevant bundles:", bundle_paths if bundle_paths.size > 0
+    raise "No output bundles found for app #{app_name}"
+  end
 end
 
 # Instruments wants the test_script and app_bundle to be a fully-qualified path
