@@ -149,15 +149,13 @@ Dir.chdir(test_output) do
             w.close
             r.close
             Process.wait(pid)
-          rescue PTY::ChildExited
+          rescue Errno::EIO, EOFError, PTY::ChildExited
           end
           puts "Pid #{pid} killed."
         end
       end
     end
-  rescue Errno::EIO
-  rescue EOFError
-  rescue PTY::ChildExited => e
+  rescue Errno::EIO, EOFError, PTY::ChildExited
     STDERR.puts "Instruments exited unexpectedly"
     exit 1
   end
