@@ -39,12 +39,11 @@ raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bund
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 XCODE_ROOT = `/usr/bin/xcode-select -print-path`.chomp.sub(/^\s+/, "")
 
+TEMPLATE = `[ -f /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate ] && echo "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate" || echo "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"`.chomp.sub(/^\s+/, "")
+
 command = ["/usr/bin/instruments"]
 command << "-w" << options.device if options.device
-# XCode < 4.5
-#command << "-t" << "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
-# XCode 4.5
-command << "-t" << "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+command << "-t" << "#{TEMPLATE}"
 command << app_bundle
 command << "-e" << "UIASCRIPT" << test_script
 command << "-e" << "UIARESULTSPATH" << test_output
