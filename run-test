@@ -9,15 +9,31 @@ options = OpenStruct.new
 options.env_vars = {}
 
 opts_parser = OptionParser.new do |opts|
-  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]"
+  opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]" +
+    "\n  If <app bundle> is the name of the app without extension, the newest bundle is located autmatically"
 
-  opts.on("-d", "--device [DEVICE]", "Device UDID to run test against") do |dev|
+  opts.on("-d", "--device DEVICE", "Device UDID to run test against,",
+          "or 'dynamic' to find the UDID at runtime") do |dev|
     options.device = dev
   end
 
-  opts.on("-e", "--environment [ENV]", "Pass variables in the form of name=value") do |env|
+  opts.on("-e", "--environment ENV", "Pass variables in the form of name=value") do |env|
     key, value = env.split '='
     options.env_vars[key] = value
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit 0
+  end
+
+  opts.on("-t", "--timeout DURATION", OptionParser::DecimalInteger,
+          "Maximum time in seconds with no output") do |t|
+    options.timeout = t
+  end
+
+  opts.on("-v", "--verbose", "Produce more output") do
+    options.verbose = true
   end
 end
 
@@ -28,7 +44,60 @@ end
 
 app_bundle, test_script, test_output = ARGV.shift 3
 
-opts_parser.parse!
+begin
+  opts_parser.parse!
+rescue OptionParser::ParseError => e
+  puts e
+  puts opts_parser
+  exit 1
+end
+
+# Dynamic UDID
+# Discussion: better to have a separate command line option for dynamic?
+if options.device then
+  if options.device.length == 40
+    # UDID provided
+  elsif options.device == "dynamic"
+    ioreg_output = `ioreg -w 0 -rc IOUSBDevice -k SupportsIPhoneOS`
+    if ioreg_output =~ /"USB Serial Number" = "([0-9a-z]+)"/ then
+      options.device = $1
+    else
+      raise "Couldn't get the UDID using ioreg"
+    end
+  else
+    raise "Invalid UDID with length #{options.device.length} provided"
+  end
+end
+
+# Check for already running instrument processes
+instrument_pids = `/usr/bin/pgrep -i '^instruments$'`
+if $? == 0 then
+  warn "\n### There are other 'instrument' processes running that may interfere - consider terminating them first:\nkill -9 " +
+    instrument_pids.gsub(/\s+/, " ")
+end
+
+# Find the bundle path at runtime
+# Discussion: better to have a command line option for app_name,
+# than using a "bare" app_bundle to specify app_name?
+app_name = File.basename(app_bundle, ".*")
+if app_bundle == app_name then
+  # List existing bundles, newest first
+  mdargs = 'kMDItemDisplayName == "' + app_name + '.app" || ' +
+    'kMDItemAlternateNames == "' + app_name + '.app"'
+  bundle_paths = `mdfind -0 '#{mdargs}' | xargs -0 ls -dt`.split(/\n/)
+  if options.device
+    bundles = bundle_paths.grep(/\/(Debug|Release)-iphoneos\//)
+  else
+    bundles = bundle_paths.grep(/\/iPhone Simulator\/|\/(Debug|Release)-iphonesimulator\//)
+  end
+  if bundles.size > 0
+    app_bundle = bundles[0]
+    puts "Found relevant bundles (newest first):", bundles, "\n" if options.verbose
+  else
+    STDERR.puts "Matching but irrelevant bundles:", bundle_paths if bundle_paths.size > 0
+    raise "No output bundles found for app #{app_name}"
+  end
+end
 
 # Instruments wants the test_script and app_bundle to be a fully-qualified path
 test_script = File.expand_path(test_script)
@@ -51,7 +120,7 @@ options.env_vars.to_a.each do |pair|
   command << "-e"
   command.concat(pair)
 end
-puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ')
+puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ') if options.verbose
 
 failed = false
 
@@ -62,18 +131,34 @@ end
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
-      r.each do |line|
-        puts line
-        _, date, time, tz, type, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
+      running = true
+      while running do
+        if IO.select([r], nil, nil, options.timeout) then
+          line = r.readline
+          puts line
+          _, date, time, tz, type, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
-        case type
-        when "Fail"
+          case type
+          when "Fail"
+            failed = true
+          end
+        else
           failed = true
+          running = false
+          warn "\n### Timeout #{options.timeout} reached without any output - " +
+            "killing Instruments (pid #{pid})..."
+          begin
+            Process.kill(9, pid)
+            w.close
+            r.close
+            Process.wait(pid)
+          rescue Errno::EIO, EOFError, PTY::ChildExited
+          end
+          puts "Pid #{pid} killed."
         end
       end
     end
-  rescue Errno::EIO
-  rescue PTY::ChildExited => e
+  rescue Errno::EIO, EOFError, PTY::ChildExited
     STDERR.puts "Instruments exited unexpectedly"
     exit 1
   end
