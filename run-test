@@ -36,6 +36,11 @@ raise "Test script '#{test_script}' doesn't exist" unless File.exist?(test_scrip
 app_bundle = File.expand_path(app_bundle)
 raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bundle)
 
+# instrument cli helper does not recognise any relative directory.
+# expand the relative directory and throw an exception if it does not texist.
+test_output = File.expand_path(test_output)
+raise 'Output directory #{test_output} does not exist' unless File.directory?(test_output)
+
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 XCODE_ROOT = `/usr/bin/xcode-select -print-path`.chomp.sub(/^\s+/, "")
 
