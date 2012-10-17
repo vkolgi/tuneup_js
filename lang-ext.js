@@ -15,7 +15,9 @@ function dumpProperties(obj) {
   var dumpStr = "";
   for (var propName in obj) {
     if (obj.hasOwnProperty(propName)) {
-      if (dumpStr != "") dumpStr += ", ";
+      if (dumpStr != "") {
+        dumpStr += ", ";
+      }
       dumpStr += (propName + "=" + obj[propName]);
     }
   }
@@ -30,21 +32,23 @@ extend(Array.prototype, {
    * */
   contains: function(f) {
     for (i = 0; i < this.length; i++) {
-      if (f(this[i])) return this[i];
+      if (f(this[i])) {
+        return this[i];
+      }
     }
     return null;
   }
 });
 
 String.prototype.trim = function() {
-	return this.replace(/^\s+|\s+$/g,"");
+  return this.replace(/^\s+|\s+$/g,"");
 };
 
 String.prototype.ltrim = function() {
-	return this.replace(/^\s+/,"");
+  return this.replace(/^\s+/,"");
 };
 
 String.prototype.rtrim = function() {
-	return this.replace(/\s+$/,"");
+  return this.replace(/\s+$/,"");
 };
 
