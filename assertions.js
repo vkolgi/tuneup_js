@@ -17,8 +17,12 @@ function retry() {
   var f = arguments[0];
   var maxTries = 3;
   var delay = 0.5;
-  if (arguments.length > 1) { maxTries = arguments[1]; }
-  if (arguments.length > 2) { delay = arguments[2]; }
+  if (arguments.length > 1) {
+    maxTries = arguments[1];
+  }
+  if (arguments.length > 2) {
+    delay = arguments[2];
+  }
 
   var tries = 0;
   var exception = null;
@@ -42,7 +46,9 @@ function retry() {
  */
 function assertTrue(expression, message) {
   if (! expression) {
-    if (! message) { message = "Assertion failed"; }
+    if (! message) {
+      message = "Assertion failed";
+    }
     throw message;
   }
 }
@@ -97,7 +103,7 @@ function assertNull(thingie, message) {
   var defMessage = "Expected a null object, but received <" + thingie + ">"; 
   // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
   assertTrue(thingie === null || thingie.toString() == "[object UIAElementNil]",
-             message ? message + ": " + defMessage : defMessage);
+    message ? message + ": " + defMessage : defMessage);
 }
 
 /**
@@ -108,7 +114,7 @@ function assertNull(thingie, message) {
 function assertNotNull(thingie, message) {
   var defMessage = "Expected not null object";
   assertTrue(thingie !== null && thingie.toString() != "[object UIAElementNil]", 
-             message ? message + ": " + defMessage : defMessage);
+    message ? message + ": " + defMessage : defMessage);
 }
 
 /**
@@ -258,16 +264,13 @@ function assertPropertiesMatch(expected, given, level) {
       if (propName.match(/~iphone$/)) {
         if (UIATarget.localTarget().model().match(/^iPhone/) === null) {
           continue;  // we're on the wrong platform, ignore
-        }
-        else {
+        } else {
           propName = propName.match(/^(.*)~iphone/)[1];
         }
-      }
-      else if (propName.match(/~ipad$/)) {
+      } else if (propName.match(/~ipad$/)) {
         if (UIATarget.localTarget().model().match(/^iPad/) === null) {
           continue;  // we're on the wrong platform, ignore
-        }
-        else {
+        } else {
           propName = propName.match(/^(.*)~ipad/)[1];
         }
       }
@@ -300,19 +303,15 @@ function assertPropertiesMatch(expected, given, level) {
         var expectedPropType = typeof(expectedProp);
         if (expectedPropType == "string") {
           assertEquals(expectedProp, givenProp);
-        }
-        else if (expectedPropType == "number") {
+        } else if (expectedPropType == "number") {
           assertEquals(expectedProp, givenProp);
-        }
-        else if (expectedPropType == "function") {
+        } else if (expectedPropType == "function") {
           if (expectedProp.constructor == RegExp) {
             assertMatch(expectedProp, givenProp);
-          }
-          else {
+          } else {
             expectedProp(givenProp);
           }
-        }
-        else if (expectedPropType == "object") {
+        } else if (expectedPropType == "object") {
           if (expectedProp.constructor === Array) {
             var expectedPropLength = expectedProp.length;
             for (var i = 0; i < expectedPropLength; i++) {
@@ -320,19 +319,15 @@ function assertPropertiesMatch(expected, given, level) {
               var giv = givenProp[i];
               assertPropertiesMatch(exp, giv, level + 1);
             }
-          }
-          else if (expectedProp.constructor === RegExp) {
+          } else if (expectedProp.constructor === RegExp) {
             assertMatch(expectedProp, givenProp);
-          }
-          else if (typeof(givenProp) == "object") {
+          } else if (typeof(givenProp) == "object") {
             assertPropertiesMatch(expectedProp, givenProp, level + 1);
-          }
-          else {
+          } else {
             UIALogger.logError("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
             throw propName;
           }
-        }
-        else {
+        } else {
           UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
         }
       }
