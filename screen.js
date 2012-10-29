@@ -1,5 +1,5 @@
 Screen = {
-  screens: new Object(),
+  screens: {},
   
   add: function(name, definition) {
     this.screens[name] = definition;

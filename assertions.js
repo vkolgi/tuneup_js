@@ -7,7 +7,7 @@ function fail(message) {
 
 /**
  * Perform an assertion several times. If the assertion passes before the
- * maximum number of iterations, the assertion passes. Otherwise the 
+ * maximum number of iterations, the assertion passes. Otherwise the
  * assertion fails
  * @param f The function to perform (possibly) multiple times
  * @param maxTries (optional) The maximum number of attempts
@@ -54,7 +54,7 @@ function assertTrue(expression, message) {
 }
 
 /**
- * Asserts that the given regular expression matches the result of the 
+ * Asserts that the given regular expression matches the result of the
  * given message.
  * @param pattern - the pattern to match
  * @param expression - the expression to match against
@@ -86,7 +86,7 @@ function assertNotEquals(expected, received, message) {
 }
 
 /**
- * Asserts that the given expression is false and otherwise throws an 
+ * Asserts that the given expression is false and otherwise throws an
  * exception with a default message, or the optional +message+ parameter
  */
 function assertFalse(expression, message) {
@@ -100,7 +100,7 @@ function assertFalse(expression, message) {
  * +message+ parameter.
  */
 function assertNull(thingie, message) {
-  var defMessage = "Expected a null object, but received <" + thingie + ">"; 
+  var defMessage = "Expected a null object, but received <" + thingie + ">";
   // TODO: string-matching on UIAElementNil makes my tummy feel bad. Fix it.
   assertTrue(thingie === null || thingie.toString() == "[object UIAElementNil]",
     message ? message + ": " + defMessage : defMessage);
@@ -113,7 +113,7 @@ function assertNull(thingie, message) {
  */
 function assertNotNull(thingie, message) {
   var defMessage = "Expected not null object";
-  assertTrue(thingie !== null && thingie.toString() != "[object UIAElementNil]", 
+  assertTrue(thingie !== null && thingie.toString() != "[object UIAElementNil]",
     message ? message + ": " + defMessage : defMessage);
 }
 
@@ -174,7 +174,7 @@ function assertElementTree(element, definition) {
  * PROPERTY MATCHERS For each property you wish to make an assertion about, you
  * can specify a string, number regular expression or function. Strings and
  * numbers are matches using the assertEquals() method. Regular expressions are
- * matches using the assertMatch() method. 
+ * matches using the assertMatch() method.
  *
  * If you specify 'null' for a property, it means you don't care to match.
  * Typically this is done inside of arrays where you need to match the number
@@ -246,12 +246,12 @@ function assertWindow(window) {
   application = target.frontMostApp();
   mainWindow = application.mainWindow();
 
-  assertElementTree(mainWindow, window)
+  assertElementTree(mainWindow, window);
 }
 
 /**
  * Asserts that the +expected+ object matches the +given+ object by making
- * assertions appropriate based on the type of each property in the 
+ * assertions appropriate based on the pe of each property in the
  * +expected+ object. This method will recurse through the structure,
  * applying assertions for each matching property path. See the description
  * for +assertWindow+ for details on the matchers.
@@ -279,7 +279,7 @@ function assertPropertiesMatch(expected, given, level) {
 
       if (typeof(givenProp) == "function") {
         try {
-          // We have to use eval (shudder) because calling functions on 
+          // We have to use eval (shudder) because calling functions on
           // UIAutomation objects with () operator crashes
           // See Radar bug 8496138
           givenProp = eval("given." + propName + "()");

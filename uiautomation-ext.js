@@ -22,10 +22,10 @@ extend(UIATableView.prototype, {
 extend(UIAElement.prototype, {
   // Poll till the item becomes visible, up to a specified timeout
   waitUntilVisible: function (timeoutInSeconds) {
-    timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
+    timeoutInSeconds = timeoutInSeconds === null ? 5 : timeoutInSeconds;
     var element = this;
     var delay = 0.25;
-    retry(function() { 
+    retry(function() {
       if(!element.isVisible()) {
         throw("Element (" +  element + ") didn't become visible within " + timeoutInSeconds + " seconds.");
       }
@@ -173,14 +173,14 @@ extend(UIAKeyboard.prototype,{
 TODO: Character keyboard is super slow.
 */
 var typeString = function(pstrString, pbClear) {
-  pstrString += ''; // convert number to string 
+  pstrString += ''; // convert number to string
   if (!this.hasKeyboardFocus()){
     this.tap();
   }
 
   UIATarget.localTarget().delay(0.5);
 
-  if (pbClear || pstrString.length == 0) {
+  if (pbClear || pstrString.length === 0) {
     this.clear();
   }
 
@@ -219,9 +219,9 @@ var typeString = function(pstrString, pbClear) {
             strChar = "9";
           } else {
             strChar = "10";
-          } else { 
-            strChar = (parseInt(strChar) - 1).toString();
           }
+        } else {
+          strChar = (parseInt(strChar, 10) - 1).toString();
         }
         keys[strChar].tap();
       } else {
@@ -233,7 +233,7 @@ var typeString = function(pstrString, pbClear) {
 };
 
 extend(UIATextField.prototype,{
-  typeString: typeString,
+  typeString: typeString
 });
 extend(UIATextView.prototype,{
   typeString: typeString

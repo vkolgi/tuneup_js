@@ -5,7 +5,7 @@
  * a +UIApplication+ object which it can use to exercise and validate your
  * application.
  *
- * The +options+ parameter is an optional object/hash thingie that 
+ * The +options+ parameter is an optional object/hash thingie that
  * supports the following:
  *    logTree -- a boolean to log the element tree when the test fails (default 'true')
  *
@@ -16,7 +16,7 @@
  *
  */
 function test(title, f, options) {
-  if (options == null) {
+  if (options === null) {
     options = {
       logTree: true
     };

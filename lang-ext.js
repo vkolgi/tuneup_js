@@ -6,7 +6,7 @@ function extend(destination, source) {
     destination[property] = source[property];
   }
   return destination;
-};
+}
 
 /**
  * Dump the properties out a String returned by the function.
@@ -15,7 +15,7 @@ function dumpProperties(obj) {
   var dumpStr = "";
   for (var propName in obj) {
     if (obj.hasOwnProperty(propName)) {
-      if (dumpStr != "") {
+      if (dumpStr !== "") {
         dumpStr += ", ";
       }
       dumpStr += (propName + "=" + obj[propName]);
