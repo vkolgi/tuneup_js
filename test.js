@@ -16,7 +16,7 @@
  *
  */
 function test(title, f, options) {
-  if (options === null) {
+  if (!options) {
     options = {
       logTree: true
     };
