@@ -4,9 +4,11 @@ require "fileutils"
 require "optparse"
 require "ostruct"
 require "pty"
+require File.join(File.dirname(__FILE__), "colorize")
 
 options = OpenStruct.new
 options.env_vars = {}
+options.colorize = true
 
 opts_parser = OptionParser.new do |opts|
   opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]" +
@@ -34,6 +36,10 @@ opts_parser = OptionParser.new do |opts|
 
   opts.on("-v", "--verbose", "Produce more output") do
     options.verbose = true
+  end
+  
+  opts.on("-n", "--no-colors", "Don't colorize the output") do
+    options.colorize = false
   end
 end
 
@@ -134,15 +140,33 @@ unless File.directory? test_output
   FileUtils.mkdir_p test_output
 end
 
+def colorize(type, line)
+  if /start/i =~ type
+    return line.cyan
+  elsif /pass/i =~ type
+    return line.green
+  elsif /fail/i =~ type || /error/i =~ type
+    return line.red
+  elsif /warning/i =~ type || /issue/i =~ type
+    return line.yellow
+  else
+    return line
+  end
+end
+
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
       running = true
       while running do
         if IO.select([r], nil, nil, options.timeout) then
-          line = r.readline
-          puts line
+          line = r.readline.strip
           _, date, time, tz, type, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
+
+          
+          puts "\n" if /start/i =~ type     # add a blank line before each test to visually group the output
+          line = colorize(type, line) if options.colorize
+          puts line
 
           case type
           when "Fail"
@@ -167,14 +191,17 @@ Dir.chdir(test_output) do
   rescue Errno::EIO
   rescue EOFError
   rescue PTY::ChildExited => e
-    STDERR.puts "Instruments exited unexpectedly"
+    message = "Instruments exited unexpectedly"
+    STDERR.puts options.colorize ? message.red : message
     exit 1
   end
 
   if failed
-    STDERR.puts "#{test_script} failed, see log output for details"
+    message = "#{test_script} failed, see log output for details"
+    STDERR.puts options.colorize ? message.red : message
     exit 1
   else
-    STDOUT.puts "TEST PASSED"
+    message = "TEST PASSED"
+    STDOUT.puts options.colorize ? message.green : message
   end
 end
