@@ -93,6 +93,7 @@ if app_bundle == app_name then
   if bundles.size > 0
     app_bundle = bundles[0]
     puts "Found relevant bundles (newest first):", bundles, "\n" if options.verbose
+    puts "Using bundle:", app_bundle, "\n"
   else
     STDERR.puts "Matching but irrelevant bundles:", bundle_paths if bundle_paths.size > 0
     raise "No output bundles found for app #{app_name}"
