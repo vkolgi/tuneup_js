@@ -4,7 +4,9 @@ require "fileutils"
 require "optparse"
 require "ostruct"
 require "pty"
+require "tempfile"
 require File.join(File.dirname(__FILE__), "colorize")
+require File.join(File.dirname(__FILE__), "preprocessor")
 
 options = OpenStruct.new
 options.env_vars = {}
@@ -40,6 +42,10 @@ opts_parser = OptionParser.new do |opts|
   
   opts.on("-n", "--no-colors", "Don't colorize the output") do
     options.colorize = false
+  end
+  
+  opts.on("-p", "--preprocess", "Use own preprocessor to substitude imports") do
+    options.preprocess = true
   end
 end
 
@@ -111,6 +117,17 @@ test_script = File.expand_path(test_script)
 raise "Test script '#{test_script}' doesn't exist" unless File.exist?(test_script)
 app_bundle = File.expand_path(app_bundle)
 raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bundle)
+
+# apply custom preprocessing to test_script
+temp_file = nil
+if options.preprocess
+  puts "Preprocessing file..." if options.verbose
+  temp_file = Tempfile.new(File.basename(test_script))
+  temp_file.write(Preprocessor.process test_script)
+  temp_file.flush
+  test_script = temp_file.path
+  puts "contents written to temp file #{temp_file.path}", "\n" if options.verbose
+end
 
 # instrument cli helper does not recognise any relative directory.
 # expand the relative directory and throw an exception if it does not texist.
@@ -204,4 +221,10 @@ Dir.chdir(test_output) do
     message = "TEST PASSED"
     STDOUT.puts options.colorize ? message.green : message
   end
+end
+
+if temp_file and options.preprocess
+  temp_file.close
+  temp_file.unlink
+  puts "Deleted temp file #{temp_file.path}"
 end
