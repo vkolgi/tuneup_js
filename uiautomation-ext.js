@@ -134,19 +134,22 @@ extend(UIATarget.prototype, {
    },
 
    /**
-  * A convenience method for detecting that you're running on an iPad
-  */
-  isDeviceiPad: function() {
-    return this.model().match(/^iPad/) !== null;
-  },
+    * A convenience method for detecting that you're running on an iPad
+    */
+    isDeviceiPad: function() {
+      //model is iPhone Simulator, even when running in iPad mode
+      return this.model().match(/^iPad/) !== null ||
+        this.name().match(/iPad Simulator/) !== null;
+    },
 
-  /**
-   * A convenience method for detecting that you're running on an
-   * iPhone or iPod touch
-   */
-  isDeviceiPhone: function() {
-    return this.model().match(/^iPhone/) !== null;
-  }
+    /**
+     * A convenience method for detecting that you're running on an
+     * iPhone or iPod touch
+     */
+    isDeviceiPhone: function() {
+      return this.model().match(/^iPad/) === null &&
+        this.name().match(/^iPad Simulator$/) === null;
+    }
 });
 extend(UIAKeyboard.prototype,{
   KEYBOARD_TYPE_UNKNOWN :-1,
@@ -236,5 +239,9 @@ extend(UIATextField.prototype,{
   typeString: typeString
 });
 extend(UIATextView.prototype,{
+<<<<<<< HEAD
   typeString: typeString
+=======
+	typeString: typeString
+>>>>>>> 37b877ab458d00cccd8cfc40a6fba4dc819026f7
 });
