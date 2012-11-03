@@ -169,7 +169,7 @@ Dir.chdir(test_output) do
           puts line
 
           case type
-          when "Fail"
+          when "Fail", "Error"
             failed = true
           end
         else
