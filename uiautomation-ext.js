@@ -272,9 +272,5 @@ extend(UIATextField.prototype,{
   typeString: typeString
 });
 extend(UIATextView.prototype,{
-<<<<<<< HEAD
   typeString: typeString
-=======
-	typeString: typeString
->>>>>>> 37b877ab458d00cccd8cfc40a6fba4dc819026f7
 });
