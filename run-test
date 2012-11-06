@@ -39,8 +39,11 @@ opts_parser = OptionParser.new do |opts|
   opts.on("-v", "--verbose", "Produce more output") do
     options.verbose = true
   end
+
+  opts.on("-q", "--quiet", "Don't print test results to console") do
+    options.quiet = true
+  end
   
-  opts.on("-c", "--colors", "Colorize the console output") do
   opts.on("-c", "--color", "Colorize the console output") do
     options.colorize = true
   end
@@ -68,7 +71,9 @@ end
 
 # Output options
 outputs = []
+unless options.quiet
   outputs << (options.colorize ? ColoredConsoleOutput.new : ConsoleOutput.new)
+end
 
 
 # Dynamic UDID
