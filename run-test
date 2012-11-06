@@ -5,8 +5,9 @@ require "optparse"
 require "ostruct"
 require "pty"
 require "tempfile"
-require File.expand_path(File.join(File.dirname(__FILE__), "colorize"))
 require File.expand_path(File.join(File.dirname(__FILE__), "preprocessor"))
+require File.expand_path(File.join(File.dirname(__FILE__), "console_output"))
+require File.expand_path(File.join(File.dirname(__FILE__), "colored_console_output"))
 
 options = OpenStruct.new
 options.env_vars = {}
@@ -63,6 +64,12 @@ rescue OptionParser::ParseError => e
   puts opts_parser
   exit 1
 end
+
+
+# Output options
+outputs = []
+  outputs << (options.colorize ? ColoredConsoleOutput.new : ConsoleOutput.new)
+
 
 # Dynamic UDID
 # Discussion: better to have a separate command line option for dynamic?
@@ -157,20 +164,6 @@ unless File.directory? test_output
   FileUtils.mkdir_p test_output
 end
 
-def colorize(type, line)
-  if /start/i =~ type
-    return line.cyan
-  elsif /pass/i =~ type
-    return line.green
-  elsif /fail/i =~ type || /error/i =~ type
-    return line.red
-  elsif /warning/i =~ type || /issue/i =~ type
-    return line.yellow
-  else
-    return line
-  end
-end
-
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
@@ -178,14 +171,13 @@ Dir.chdir(test_output) do
       while running do
         if IO.select([r], nil, nil, options.timeout) then
           line = r.readline.strip
-          _, date, time, tz, type, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
+          match, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
-          
-          puts "\n" if /start/i =~ type     # add a blank line before each test to visually group the output
-          line = colorize(type, line) if options.colorize
-          puts line
+          outputs.each do |output|
+            match ? output.add_status(date, time, tz, status, msg) : output.add(line)
+          end
 
-          case type
+          case status
           when "Fail", "Error"
             failed = true
           end
@@ -208,23 +200,20 @@ Dir.chdir(test_output) do
   rescue Errno::EIO
   rescue EOFError
   rescue PTY::ChildExited => e
-    message = "Instruments exited unexpectedly"
-    STDERR.puts options.colorize ? message.red : message
+    STDERR.puts "Instruments exited unexpectedly"
     exit 1
   end
 
   if failed
-    message = "#{test_script} failed, see log output for details"
-    STDERR.puts options.colorize ? message.red : message
+    STDERR.puts "#{test_script} failed, see log output for details"
     exit 1
   else
-    message = "TEST PASSED"
-    STDOUT.puts options.colorize ? message.green : message
+    STDOUT.puts "TEST PASSED"
   end
 end
 
 if temp_file and options.preprocess
   temp_file.close
   temp_file.unlink
-  puts "Deleted temp file #{temp_file.path}"
+  puts "Deleted temp file"
 end
