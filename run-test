@@ -163,12 +163,21 @@ options.env_vars.to_a.each do |pair|
 end
 puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ') if options.verbose
 
-failed = false
-
 unless File.directory? test_output
   FileUtils.mkdir_p test_output
 end
 
+def parse_status(status)
+  return :start if /start/i =~ status
+  return :pass if /pass/i =~ status
+  return :fail if /fail/i =~ status
+  return :error if /error/i =~ status
+  return :warning if /warning/i =~ status
+  return :issue if /issue/i =~ status
+  return :unknown
+end
+
+failed = false
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
@@ -177,15 +186,13 @@ Dir.chdir(test_output) do
         if IO.select([r], nil, nil, options.timeout) then
           line = r.readline.strip
           match, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
+          status = parse_status(status)
 
           outputs.each do |output|
-            match ? output.add_status(date, time, tz, status, msg) : output.add(line)
+            match ? output.add_status(status, date, time, tz, msg) : output.add(line)
           end
 
-          case status
-          when "Fail", "Error"
-            failed = true
-          end
+          failed = true if [:fail, :error].include? status
         else
           failed = true
           running = false
@@ -207,6 +214,8 @@ Dir.chdir(test_output) do
   rescue PTY::ChildExited => e
     STDERR.puts "Instruments exited unexpectedly"
     exit 1
+  ensure
+    outputs.map(&:close)
   end
 
   if failed

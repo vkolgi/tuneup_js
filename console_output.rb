@@ -3,12 +3,15 @@ class ConsoleOutput
     puts line
   end
   
-  def add_status(date, time, time_zone, status, msg)
-    puts "\n" if /start/i =~ status     # add a blank line before each test to visually group the output
-    puts format(date, time, time_zone, status, msg)
+  def add_status(status, date, time, time_zone, msg)
+    puts "\n" if status == :start     # add a blank line before each test to visually group the output
+    puts format(status, date, time, time_zone, msg)
   end
   
-  def format(date, time, time_zone, status, msg)
-    "#{date} #{time} #{time_zone} #{status}: #{msg}"
+  def format(status, date, time, time_zone, msg)
+    "#{date} #{time} #{time_zone} #{status.to_s.capitalize}: #{msg}"
+  end
+  
+  def close
   end
 end

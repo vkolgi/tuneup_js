@@ -7,21 +7,17 @@ class ColoredConsoleOutput < ConsoleOutput
   }
   
   STATUS_COLORS = {
-    /start/i => :cyan,
-    /pass/i => :green,
-    /fail/i => :red,
-    /error/i => :red,
-    /warning/i => :yellow,
-    /issue/i => :yellow
+    :start => :cyan,
+    :pass => :green,
+    :fail => :red,
+    :error => :red,
+    :warning => :yellow,
+    :issue => :yellow
   }
   
-  def format(date, time, time_zone, status, msg)
+  def format(status, date, time, time_zone, msg)
     output = super
-
-    STATUS_COLORS.each do |pattern, color|
-      return colorize(output, color) if pattern =~ status
-    end
-    
+    output = colorize(output, STATUS_COLORS[status]) if STATUS_COLORS[status]
     output
   end
   
