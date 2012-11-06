@@ -5,8 +5,8 @@ require "optparse"
 require "ostruct"
 require "pty"
 require "tempfile"
-require File.join(File.dirname(__FILE__), "colorize")
-require File.join(File.dirname(__FILE__), "preprocessor")
+require File.expand_path(File.join(File.dirname(__FILE__), "colorize"))
+require File.expand_path(File.join(File.dirname(__FILE__), "preprocessor"))
 
 options = OpenStruct.new
 options.env_vars = {}
