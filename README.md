@@ -16,7 +16,7 @@ Put the files for this project in the same location as your test scripts
 that your run from Instruments. I like to use git submodules for third-party
 libraries like so:
 
-  git submodule add git://github.com/alexvollmer/tuneup_js.git tuneup
+    git submodule add git://github.com/alexvollmer/tuneup_js.git tuneup
 
 Then at the top of each test script include the following:
 
@@ -152,37 +152,54 @@ an attempt to cut down on the verbosity of your tests.
 
 See the `uiautomation-ext.js` for details.
 
-# Running Tests
+# Running Tests #
 
 Starting in iOS 5, Apple provided a way to run Instruments from the 
 command-line. However, it's a bit fiddly and is very general-purpose
 so doing anything _useful_ with the output is kind of a pain.
 
-Tuneup now provides a Ruby script (run-test) to run your test scripts.
+Tuneup now provides a Ruby script (`run-test`) to run your test scripts.
 The runner will parse the output of your test and produce a proper
 UNIX exit code based on whether or not your tests succeeded. It also
 provides some niceties like automatically specifying the full-path
 to your test script if you don't provide one.
 
+Have a look at `run-test --help` to be sure you're not missing any newly
+added features like fancy colors.
+
 To use the runner, invoke it like so:
 
     [path to tuneup]/run-test <app bundle> <test script> <output directory> [device_id]
 
-The `<app bundle>` argument is the name of your app (*.app for a real
-device, or the crazy path to the build bundle for the simulator). The
-`<test script>` argument specifies the JavaScript test file and the
+The `<app bundle>` argument is the name of your app. For tests that 
+execute against a real device, the name of the app bundle will suffice.
+If you are running tests with the simulator you need to provide a 
+_fully-qualified_ path to the app bundle, which will be buried somewhere in 
+`~/Library/Developer/Xcode/DerivedData`. Or you can provide the name of the
+app, without path and extension, and the newest bundle is located autmatically. 
+
+The `<test script>` argument specifies the JavaScript test file and the
 `<output directory>` is where the resulting Instruments output should
 go.
 
 If you provide the optional fourth argument, `device_id`, you can tell
 Instruments to run your test against a real device (identified by
-UDID). If this argument is not provided, the runner will assume you are
+UDID). You can also pass `dynamic` and tuneup will find the UDID at
+runtime. If this argument is not provided, the runner will assume you are
 running against the simulator.
 
-*NOTE*: If you are running tests with the simulator you need to provide
-a _fully-qualified_ path to the app bundle, which will be buried
-somewhere in `~/Library/Developer/Xcode/DerivedData`. For tests that
-execute against a real device, the name of the app bundle will suffice.
+## Preprocessing ##
+
+The Instruments preprocessor causes a lot of headache due to its inability
+to handle `#import` statements properly. If you pass `-p`, the script will
+create a temp file, resolve any imports and inline the referenced files
+(only once).
+
+## XML reports ##
+
+Tuneup can generate Xunit style reports that can be analyzed by
+any compatible tool, like Jenkins. Given the parameter `-x` a XML report
+will be generated in the output directory.
 
 # Note on Patches/Pull Requests #
  
