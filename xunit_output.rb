@@ -1,14 +1,21 @@
+require 'date'
+
 class TestSuite
-  attr_reader :name
+  attr_reader :name, :timestamp
   attr_accessor :test_cases
   
   def initialize(name)
     @name = name
     @test_cases = []
+    @timestamp = DateTime.now
   end
   
   def failures
     @test_cases.count { |test| test.failed? }
+  end
+  
+  def time
+    @test_cases.map { |test| test.time }.inject(:+)
   end
 end
 
@@ -19,19 +26,31 @@ class TestCase
   def initialize(name)
     @name = name
     @messages = []
-    @failed = false
+    @failed = true
+    @start = Time.now
+    @finish = nil
   end
   
   def <<(message)
     @messages << message
   end
   
+  def pass!
+    @failed = false;
+    @finish = Time.now
+  end
+  
   def fail!
-    @failed = true;
+    @finish = Time.now
   end
   
   def failed?
     @failed
+  end
+  
+  def time
+    return 0 if @finish.nil?
+    @finish - @start
   end
 end
 
@@ -51,9 +70,10 @@ class XunitOutput
     case status
     when :start
       @suite.test_cases << TestCase.new(msg)
+    when :pass
+      @suite.test_cases.last.pass!
     when :fail
       @suite.test_cases.last.fail!
-    when :pass
     else
       @suite.test_cases.last << "#{status.to_s.capitalize}: #{msg}"
     end
@@ -65,10 +85,10 @@ class XunitOutput
   
   def serialize(suite)
     output = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << "\n"
-    output << "<testsuite name=\"#{suite.name}\" tests=\"#{suite.test_cases.count}\" failures=\"#{suite.failures}\">" << "\n"
+    output << "<testsuite name=\"#{suite.name}\" timestamp=\"#{suite.timestamp}\" time=\"#{suite.time}\" tests=\"#{suite.test_cases.count}\" failures=\"#{suite.failures}\">" << "\n"
     
     suite.test_cases.each do |test|
-      output << "  <testcase name=\"#{test.name}\">" << "\n"
+      output << "  <testcase name=\"#{test.name}\" time=\"#{test.time}\">" << "\n"
       if test.failed?
         output << "    <failure>#{test.messages.join("\n")}</failure>" << "\n"
       end
