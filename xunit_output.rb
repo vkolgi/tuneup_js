@@ -83,14 +83,26 @@ class XunitOutput
     File.open(@filename, 'w') { |f| f.write(serialize(@suite)) }
   end
   
+  def xml_escape(input)
+     result = input.dup
+
+     result.gsub!("&", "&amp;")
+     result.gsub!("<", "&lt;")
+     result.gsub!(">", "&gt;")
+     result.gsub!("'", "&apos;")
+     result.gsub!("\"", "&quot;")
+
+     return result
+  end
+  
   def serialize(suite)
     output = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << "\n"
-    output << "<testsuite name=\"#{suite.name}\" timestamp=\"#{suite.timestamp}\" time=\"#{suite.time}\" tests=\"#{suite.test_cases.count}\" failures=\"#{suite.failures}\">" << "\n"
+    output << "<testsuite name=\"#{xml_escape(suite.name)}\" timestamp=\"#{suite.timestamp}\" time=\"#{suite.time}\" tests=\"#{suite.test_cases.count}\" failures=\"#{suite.failures}\">" << "\n"
     
     suite.test_cases.each do |test|
-      output << "  <testcase name=\"#{test.name}\" time=\"#{test.time}\">" << "\n"
+      output << "  <testcase name=\"#{xml_escape(test.name)}\" time=\"#{test.time}\">" << "\n"
       if test.failed?
-        output << "    <failure>#{test.messages.join("\n")}</failure>" << "\n"
+        output << "    <failure>#{test.messages.map { |m| xml_escape(m) }.join("\n")}</failure>" << "\n"
       end
       output << "  </testcase>" << "\n"
     end
