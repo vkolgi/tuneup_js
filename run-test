@@ -188,7 +188,7 @@ def parse_status(status)
   when /warning/i then :warning
   when /issue/i then :issue
   when /default/i then :default
-  else :unknown
+  else nil
   end
 end
 
@@ -200,11 +200,11 @@ Dir.chdir(test_output) do
       while running do
         if IO.select([r], nil, nil, options.timeout) then
           line = r.readline.rstrip
-          match, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
-          status = parse_status(status)
+          _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
+          status = parse_status(status) if status
 
           outputs.each do |output|
-            match ? output.add_status(status, date, time, tz, msg) : output.add(line)
+            status ? output.add_status(status, date, time, tz, msg) : output.add(line)
           end
 
           failed = true if [:fail, :error].include? status
