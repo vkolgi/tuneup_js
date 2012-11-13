@@ -192,10 +192,11 @@ def parse_status(status)
   end
 end
 
-failed = false
+failed = true   # pessimist
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
+      failed = false    # all right, spawning the process worked
       running = true
       while running do
         if IO.select([r], nil, nil, options.timeout) then
