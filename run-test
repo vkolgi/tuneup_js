@@ -200,6 +200,15 @@ Dir.chdir(test_output) do
       while running do
         if IO.select([r], nil, nil, options.timeout) then
           line = r.readline.rstrip
+          if !!(line =~ /Instruments Trace Error/i)
+            failed = true
+            running = false
+            outputs.each do |output|
+              output.add(line)
+            end
+            break
+          end
+
           _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
           status = parse_status(status) if status
 
