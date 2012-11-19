@@ -101,6 +101,7 @@ if options.device then
     ioreg_output = `ioreg -w 0 -rc IOUSBDevice -k SupportsIPhoneOS`
     if ioreg_output =~ /"USB Serial Number" = "([0-9a-z]+)"/ then
       options.device = $1
+      puts "Using device with UDID #{options.device}", "\n" if options.verbose
     else
       raise "Couldn't get the UDID using ioreg"
     end
