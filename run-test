@@ -247,4 +247,5 @@ if temp_file and options.preprocess
   temp_file.close
   temp_file.unlink
   puts "Deleted temp file"
+  puts "Deleted temp file" if options.verbose
 end
