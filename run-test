@@ -76,7 +76,7 @@ end
 # instrument cli helper does not recognise any relative directory.
 # expand the relative directory and throw an exception if it does not texist.
 test_output = File.expand_path(test_output)
-raise 'Output directory #{test_output} does not exist' unless File.directory?(test_output)
+raise "Output directory #{test_output} does not exist" unless File.directory?(test_output)
 
 
 # Output options
