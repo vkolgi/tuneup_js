@@ -192,11 +192,23 @@ def parse_status(status)
   end
 end
 
-failed = true   # pessimist
+def failed?(statistics)
+  statistics[:total].to_i == 0 || statistics[:fail].to_i > 0 || statistics[:error].to_i > 0
+end
+
+def format_statistics(statistics)
+  output = "#{statistics[:total].to_i} tests, #{statistics[:fail].to_i} failures"
+  output << ", #{statistics[:error].to_i} errors" if statistics[:error].to_i > 0
+  output << ", #{statistics[:warning].to_i} warnings" if statistics[:warning].to_i > 0
+  output << ", #{statistics[:issue].to_i} issues" if statistics[:issue].to_i > 0
+  output
+end
+
+statistics = {}
+timeout = false
 Dir.chdir(test_output) do
   begin
     PTY.spawn(*command) do |r, w, pid|
-      failed = false    # all right, spawning the process worked
       running = true
       while running do
         if IO.select([r], nil, nil, options.timeout) then
@@ -204,13 +216,15 @@ Dir.chdir(test_output) do
           _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
           status = parse_status(status) if status
 
-          outputs.each do |output|
-            status ? output.add_status(status, date, time, tz, msg) : output.add(line)
+          if status
+            outputs.each { |output| output.add_status(status, date, time, tz, msg) }
+            statistics[:total] = statistics[:total].to_i + 1
+            statistics[status] = statistics[status].to_i + 1
+          else
+            outputs.each { |output| output.add(line) }
           end
-
-          failed = true if [:fail, :error].include? status
         else
-          failed = true
+          timeout = true
           running = false
           warn "\n### Timeout #{options.timeout} reached without any output - " +
             "killing Instruments (pid #{pid})..."
@@ -234,10 +248,12 @@ Dir.chdir(test_output) do
     outputs.map(&:close)
   end
 
-  if failed
+  if timeout || failed?(statistics)
+    STDERR.puts format_statistics(statistics)
     STDERR.puts "#{test_script} failed, see log output for details"
     exit 1
   else
+    STDOUT.puts format_statistics(statistics)
     STDOUT.puts "TEST PASSED"
   end
 end
