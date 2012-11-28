@@ -218,7 +218,7 @@ Dir.chdir(test_output) do
 
           if status
             outputs.each { |output| output.add_status(status, date, time, tz, msg) }
-            statistics[:total] = statistics[:total].to_i + 1
+            statistics[:total] = statistics[:total].to_i + 1 if status == :start
             statistics[status] = statistics[status].to_i + 1
           else
             outputs.each { |output| output.add(line) }
