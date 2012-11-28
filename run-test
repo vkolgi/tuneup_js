@@ -175,9 +175,9 @@ options.env_vars.to_a.each do |pair|
 end
 puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ') if options.verbose
 
-unless File.directory? test_output
-  FileUtils.mkdir_p test_output
-end
+
+FileUtils.mkdir_p test_output unless File.directory? test_output
+
 
 def parse_status(status)
   case status
