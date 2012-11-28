@@ -171,16 +171,16 @@ To use the runner, invoke it like so:
 
     [path to tuneup]/run-test <app bundle> <test script> <output directory> [optional args]
 
-The `<app bundle>` argument is the name of your app. For tests that 
-execute against a real device, the name of the app bundle will suffice.
-If you are running tests with the simulator you need to provide a 
-_fully-qualified_ path to the app bundle, which will be buried somewhere in 
-`~/Library/Developer/Xcode/DerivedData`. Or you can provide the name of the
-app, without path and extension, and the newest bundle is located autmatically. 
+Normally the name of the app bundle will suffice for the `<app bundle>` 
+argument. If you're running your tests on the simulator the newest bundle 
+will be located automatically. If that fails, or if you want to manually
+specify the bundle to be used, you need to provide a _fully-qualified_
+path to the app bundle, which will be buried somewhere in 
+`~/Library/Developer/Xcode/DerivedData`.
 
 The `<test script>` argument specifies the JavaScript test file and the
-`<output directory>` is where the resulting Instruments output should
-go.
+`<output directory>` is where the resulting Instruments output like screenshots
+and reports should go.
 
 ## Device or Simulator ##
 
