@@ -169,7 +169,7 @@ added features like fancy colors.
 
 To use the runner, invoke it like so:
 
-    [path to tuneup]/run-test <app bundle> <test script> <output directory> [device_id]
+    [path to tuneup]/run-test <app bundle> <test script> <output directory> [optional args]
 
 The `<app bundle>` argument is the name of your app. For tests that 
 execute against a real device, the name of the app bundle will suffice.
@@ -182,11 +182,12 @@ The `<test script>` argument specifies the JavaScript test file and the
 `<output directory>` is where the resulting Instruments output should
 go.
 
-If you provide the optional fourth argument, `device_id`, you can tell
-Instruments to run your test against a real device (identified by
-UDID). You can also pass `dynamic` and tuneup will find the UDID at
-runtime. If this argument is not provided, the runner will assume you are
-running against the simulator.
+## Device or Simulator ##
+
+If you provide the optional argument `-d DEVICE`, you can tell Instruments 
+to run your test against a real device (identified by UDID). You can also 
+pass `dynamic` and tuneup will find the UDID at runtime. If this argument is 
+not provided, the runner will run against the simulator.
 
 ## Preprocessing ##
 
@@ -194,6 +195,12 @@ The Instruments preprocessor causes a lot of headache due to its inability
 to handle `#import` statements properly. If you pass `-p`, the script will
 create a temp file, resolve any imports and inline the referenced files
 (only once).
+
+## Selecting tests ##
+
+If you don't want to run your whole test suite, you can selectively run 
+tests by specifying the argument `-r TEST`. Whatever you pass for `TEST`
+will be used as regex to match any `title` of your tests.
 
 ## XML reports ##
 
