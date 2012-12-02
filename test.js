@@ -14,13 +14,28 @@
  *   // exercise and validate your application.
  * });
  *
+ * The +title+ is checked against every element of a global TUNEUP_ONLY_RUN 
+ * array. To check, each element is converted to a RegExp. The test is only 
+ * executed, if one check succeeds. If TUNEUP_ONLY_RUN is not defined,
+ * no checks are performed. 
  */
 function test(title, f, options) {
+  if (typeof TUNEUP_ONLY_RUN !== 'undefined') {
+    for (var i = 0; i < TUNEUP_ONLY_RUN.length; i++) {
+        if (new RegExp("^" + TUNEUP_ONLY_RUN[i] + "$").test(title)) {
+          break;
+        }
+        if (i == TUNEUP_ONLY_RUN.length -1) {
+          return;
+        }
+    }
+  }
+  
   if (!options) {
     options = {
       logTree: true
     };
-  }
+  }  
   target = UIATarget.localTarget();
   application = target.frontMostApp();
   UIALogger.logStart(title);

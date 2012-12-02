@@ -262,13 +262,15 @@ function assertPropertiesMatch(expected, given, level) {
       var expectedProp = expected[propName];
 
       if (propName.match(/~iphone$/)) {
-        if (UIATarget.localTarget().model().match(/^iPhone/) === null) {
+        if (UIATarget.localTarget().model().match(/^iPad/) !== null ||
+            UIATarget.localTarget().name().match(/^iPad Simulator$/) !== null) {
           continue;  // we're on the wrong platform, ignore
         } else {
           propName = propName.match(/^(.*)~iphone/)[1];
         }
       } else if (propName.match(/~ipad$/)) {
-        if (UIATarget.localTarget().model().match(/^iPad/) === null) {
+        if (UIATarget.localTarget().model().match(/^iPad/) === null &&
+            UIATarget.localTarget().name().match(/^iPad Simulator/) === null) {
           continue;  // we're on the wrong platform, ignore
         } else {
           propName = propName.match(/^(.*)~ipad/)[1];
