@@ -169,7 +169,7 @@ added features like fancy colors.
 
 To use the runner, invoke it like so:
 
-    [path to tuneup]/run-test <app bundle> <test script> <output directory> [optional args]
+    [path to tuneup]/test_runner/run <app bundle> <test script> <output directory> [optional args]
 
 Normally the name of the app bundle will suffice for the `<app bundle>` 
 argument. If you're running your tests on the simulator the newest bundle 
