@@ -20,32 +20,65 @@ extend(UIATableView.prototype, {
 });
 
 extend(UIAElement.prototype, {
-  // Poll till the item becomes visible, up to a specified timeout
-  waitUntilVisible: function (timeoutInSeconds) {
-    timeoutInSeconds = timeoutInSeconds === null ? 5 : timeoutInSeconds;
-    var element = this;
-    var delay = 0.25;
-    retry(function() {
-      if(!element.isVisible()) {
-        throw("Element (" +  element + ") didn't become visible within " + timeoutInSeconds + " seconds.");
-      }
-    }, timeoutInSeconds/delay, delay);
-  },
+	/**
+	 * Poll till the item becomes visible, up to a specified timeout
+	 */
+	waitUntilVisible: function (timeoutInSeconds) {
+        this.waitUntil(function(element) {
+            return element;
+        }, function(element) {
+            return element.isVisible();
+        }, timeoutInSeconds, "to become visible");
+	},
 
-  /*
-  Wait until element becomes invisible
-  */  
-  waitUntilInvisible: function (timeoutInSeconds) {
-    timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
-    var element = this;
-    var delay = 0.25;
-    retry(function() { 
-      if(element.isVisible()) {
-        throw("Element (" +  element + ") didn't become invisible within " + timeoutInSeconds + " seconds.");
-      }
-    }, timeoutInSeconds/delay, delay);
-  },
-  
+	/**
+	 * Wait until element becomes invisible
+	 */
+	waitUntilInvisible: function (timeoutInSeconds) {
+        this.waitUntil(function(element) {
+            return element;
+        }, function(element) {
+            return !element.isVisible();
+        }, timeoutInSeconds, "to become invisible");
+    },
+    
+    /**
+     * Wait until child element with name is added
+     */
+    waitUntilFoundByName: function (name, timeoutInSeconds) {
+        this.waitUntil(function(element) {
+            return element.elements().firstWithName(name);
+        }, function(element) {
+            return element.isValid();
+        }, timeoutInSeconds, "to become valid");
+    },
+    
+    /**
+     * Wait until child element with name is removed
+     */
+    waitUntilNotFoundByName: function (name, timeoutInSeconds) {
+        this.waitUntil(function(element) {
+            return element.elements().firstWithName(name);
+        }, function(element) {
+            return !element.isValid();
+        }, timeoutInSeconds, "to become invalid");
+    },
+    
+    /**
+     * Wait until element fulfills condition
+     */
+    waitUntil: function (filterFunction, conditionFunction, timeoutInSeconds, description) {
+        timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
+        var element = this;
+        var delay = 0.25;
+        retry(function() {
+            var filteredElement = filterFunction(element);
+            if(!conditionFunction(filteredElement)) {
+                throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+            }
+        }, Math.max(1, timeoutInSeconds/delay), delay);
+    },
+	
   /**
    * A shortcut for waiting an element to become visible and tap.
    */
@@ -134,19 +167,22 @@ extend(UIATarget.prototype, {
    },
 
    /**
-  * A convenience method for detecting that you're running on an iPad
-  */
-  isDeviceiPad: function() {
-    return this.model().match(/^iPad/) !== null;
-  },
+    * A convenience method for detecting that you're running on an iPad
+    */
+    isDeviceiPad: function() {
+      //model is iPhone Simulator, even when running in iPad mode
+      return this.model().match(/^iPad/) !== null ||
+        this.name().match(/iPad Simulator/) !== null;
+    },
 
-  /**
-   * A convenience method for detecting that you're running on an
-   * iPhone or iPod touch
-   */
-  isDeviceiPhone: function() {
-    return this.model().match(/^iPhone/) !== null;
-  }
+    /**
+     * A convenience method for detecting that you're running on an
+     * iPhone or iPod touch
+     */
+    isDeviceiPhone: function() {
+      return this.model().match(/^iPad/) === null &&
+        this.name().match(/^iPad Simulator$/) === null;
+    }
 });
 extend(UIAKeyboard.prototype,{
   KEYBOARD_TYPE_UNKNOWN :-1,
