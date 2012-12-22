@@ -130,6 +130,14 @@ function assertNotNull(thingie, message) {
     message ? message + ": " + defMessage : defMessage);
 }
 
+function OnPassException(message) {
+    this.name = 'OnPassException';
+    this.message = message;
+    this.toString = function() {
+        return this.name + ': "' + this.message + '"';
+    };
+}
+
 /**
  * Assert that the given definition matches the given element. The
  * definition is a JavaScript object whose property hierarchy matches
@@ -158,7 +166,7 @@ function assertElementTree(element, definition) {
       onPass(element);
     }
     catch(e) {
-      throw "Failed to execute 'onPass' callback: " + e;
+      throw new OnPassException("Failed to execute 'onPass' callback: " + e);
     }
   }
 }
