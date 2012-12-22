@@ -62,7 +62,7 @@ function assertTrue(expression, message) {
     if (! message) {
       message = "Assertion failed";
     }
-    throw message;
+    throw new AssertionException(message);
   }
 }
 
