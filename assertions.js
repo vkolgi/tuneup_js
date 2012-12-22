@@ -306,7 +306,7 @@ function assertPropertiesMatch(expected, given, level) {
       }
 
       if (givenProp === null) {
-        throw "Could not find given " + given + " property named: " + propName;
+          throw new AssertionException("Could not find given " + given + " property named: " + propName);
       }
 
       try {
