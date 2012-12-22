@@ -41,6 +41,19 @@ function retry() {
 }
 
 /**
+ * The exception thrown for all assert* failures.
+ *
+ * @param message - reason the assertion failed
+ */
+function AssertionException(message) {
+    this.name = 'AssertionException';
+    this.message = message;
+    this.toString = function() {
+        return this.name + ': "' + this.message + '"';
+    };
+}
+
+/**
  * Asserts that the given expression is true and throws an exception with
  * a default message, or the optional +message+ parameter
  */
