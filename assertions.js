@@ -15,7 +15,7 @@ function FailureException(message) {
  * Just flat-out fail the test with the given message
  */
 function fail(message) {
-  throw message;
+  throw new FailureException(message);
 }
 
 /**
