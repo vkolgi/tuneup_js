@@ -1,7 +1,7 @@
 /**
  * The exception thrown when a 'fail' is used.
  *
- * @param message - reason the failed/aborted
+ * @param message - reason the test failed/aborted
  */
 function FailureException(message) {
     this.name = 'FailureException';
