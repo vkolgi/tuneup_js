@@ -360,8 +360,9 @@ function assertPropertiesMatch(expected, given, level) {
           } else if (typeof(givenProp) == "object") {
             assertPropertiesMatch(expectedProp, givenProp, level + 1);
           } else {
-            UIALogger.logError("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
-            throw propName;
+            var message = "[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor;
+            UIALogger.logError(message);
+            throw new AssertionException(message);
           }
         } else {
           UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
