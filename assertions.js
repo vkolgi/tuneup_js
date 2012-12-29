@@ -1,8 +1,21 @@
 /**
+ * The exception thrown when a 'fail' is used.
+ *
+ * @param message - reason the test failed/aborted
+ */
+function FailureException(message) {
+    this.name = 'FailureException';
+    this.message = message;
+    this.toString = function() {
+        return this.name + ': "' + this.message + '"';
+    };
+}
+
+/**
  * Just flat-out fail the test with the given message
  */
 function fail(message) {
-  throw message;
+  throw new FailureException(message);
 }
 
 /**
@@ -41,6 +54,19 @@ function retry() {
 }
 
 /**
+ * The exception thrown for all assert* failures.
+ *
+ * @param message - reason the assertion failed
+ */
+function AssertionException(message) {
+    this.name = 'AssertionException';
+    this.message = message;
+    this.toString = function() {
+        return this.name + ': "' + this.message + '"';
+    };
+}
+
+/**
  * Asserts that the given expression is true and throws an exception with
  * a default message, or the optional +message+ parameter
  */
@@ -49,7 +75,7 @@ function assertTrue(expression, message) {
     if (! message) {
       message = "Assertion failed";
     }
-    throw message;
+    throw new AssertionException(message);
   }
 }
 
@@ -117,6 +143,14 @@ function assertNotNull(thingie, message) {
     message ? message + ": " + defMessage : defMessage);
 }
 
+function OnPassException(message) {
+    this.name = 'OnPassException';
+    this.message = message;
+    this.toString = function() {
+        return this.name + ': "' + this.message + '"';
+    };
+}
+
 /**
  * Assert that the given definition matches the given element. The
  * definition is a JavaScript object whose property hierarchy matches
@@ -145,7 +179,7 @@ function assertElementTree(element, definition) {
       onPass(element);
     }
     catch(e) {
-      throw "Failed to execute 'onPass' callback: " + e;
+      throw new OnPassException("Failed to execute 'onPass' callback: " + e);
     }
   }
 }
@@ -293,7 +327,7 @@ function assertPropertiesMatch(expected, given, level) {
       }
 
       if (givenProp === null) {
-        throw "Could not find given " + given + " property named: " + propName;
+          throw new AssertionException("Could not find given " + given + " property named: " + propName);
       }
 
       try {
@@ -326,8 +360,9 @@ function assertPropertiesMatch(expected, given, level) {
           } else if (typeof(givenProp) == "object") {
             assertPropertiesMatch(expectedProp, givenProp, level + 1);
           } else {
-            UIALogger.logError("[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor);
-            throw propName;
+            var message = "[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor;
+            UIALogger.logError(message);
+            throw new AssertionException(message);
           }
         } else {
           UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
