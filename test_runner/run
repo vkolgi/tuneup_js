@@ -36,7 +36,7 @@ opts_parser = OptionParser.new do |opts|
           "Maximum time in seconds with no output") do |t|
     options.timeout = t
   end
-  
+
   opts.on("-r", "--run TEST", "Only run tests named alike. It's possible to use RegExps.") do |test|
     options.run = test
   end
@@ -48,17 +48,21 @@ opts_parser = OptionParser.new do |opts|
   opts.on("-q", "--quiet", "Don't print test results to console") do
     options.quiet = true
   end
-  
+
   opts.on("-c", "--color", "Colorize the console output") do
     options.colorize = true
   end
-  
+
   opts.on("-p", "--preprocess", "Use own preprocessor to substitude imports") do
     options.preprocess = true
   end
-  
+
   opts.on("-x", "--xunit", "Create Xunit formatted test result file in the output directory") do
     options.xunit = true;
+  end
+
+  opts.on("-a", "--args", "Pass remaining arguments to Instruments (e.g. '-a AppleLanguages (ja)')") do
+    options.args = args
   end
 end
 
@@ -155,19 +159,19 @@ raise "App bundle '#{app_bundle}' doesn't exist" unless File.directory?(app_bund
 if options.preprocess or options.run
   temp_file = Tempfile.new(File.basename(test_script))
 
-  # inject test filter  
+  # inject test filter
   if options.run
     puts "Injecting test filter to only run test \"#{options.run}\"", "\n" if options.verbose
     temp_file.write("var TUNEUP_ONLY_RUN = [\"#{options.run}\"];\n\n")
   end
 
-  # apply custom preprocessing to test_script  
+  # apply custom preprocessing to test_script
   if options.preprocess
     puts "Preprocessing file..." if options.verbose
     temp_file.write(Preprocessor.process test_script)
     puts "contents written to temp file #{temp_file.path}", "\n" if options.verbose
   end
-  
+
   temp_file.flush
   test_script = temp_file.path
 end
@@ -188,6 +192,7 @@ options.env_vars.to_a.each do |pair|
   command << "-e"
   command.concat(pair)
 end
+command << options.args
 puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ') if options.verbose
 
 
@@ -223,13 +228,13 @@ statistics = {}
 failed = false
 
 begin
-  
+
   Dir.chdir(test_output) do
     PTY.spawn(*command) do |r, w, pid|
       while not failed do
         if IO.select([r], nil, nil, options.timeout) then
           line = r.readline.rstrip
-          
+
           _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
           if status
@@ -240,7 +245,7 @@ begin
           else
             outputs.each { |output| output.add(line) }
           end
-          
+
           failed = true if line =~ /Instruments Trace Error/i
         else
           failed = true
@@ -258,7 +263,7 @@ begin
       end
     end
   end
-  
+
 rescue Errno::EIO
 rescue EOFError
 rescue PTY::ChildExited
@@ -266,7 +271,7 @@ rescue PTY::ChildExited
   exit 1
 ensure
   outputs.map(&:close)
-  
+
   if temp_file
     temp_file.close
     temp_file.unlink

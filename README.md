@@ -182,6 +182,8 @@ The `<test script>` argument specifies the JavaScript test file and the
 `<output directory>` is where the resulting Instruments output like screenshots
 and reports should go.
 
+Run the script with `-h` or `--help` for a full explanation of supported options.
+
 The script relies on the `pgrep` command-line tool which you can install
 via [Homebrew](https://github.com/mxcl/homebrew):
 
