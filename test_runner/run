@@ -61,8 +61,8 @@ opts_parser = OptionParser.new do |opts|
     options.xunit = true;
   end
 
-  opts.on("-a", "--args", "Pass remaining arguments to Instruments (e.g. '-a AppleLanguages (ja)')") do
-    options.args = args
+  opts.on("-l", "--language=en", "Use language to simulator") do |l|
+    options.language = "-AppleLanguages \(#{l}\)"
   end
 end
 
@@ -192,7 +192,7 @@ options.env_vars.to_a.each do |pair|
   command << "-e"
   command.concat(pair)
 end
-command << options.args
+command << options.language if options.language
 puts "command=" + command.map { |s| s.sub(/\A(.*\s.*)\Z/, '"\1"') }.join(' ') if options.verbose
 
 
