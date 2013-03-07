@@ -118,10 +118,9 @@ if options.device then
 end
 
 # Check for already running instrument processes
-instrument_pids = `/usr/bin/pgrep -i '^instruments$'`
-if $? == 0 then
-  warn "\n### There are other 'instrument' processes running that may interfere - consider terminating them first:\nkill -9 " +
-    instrument_pids.gsub(/\s+/, " ")
+instrument_pids = `ps aux | grep -i instrument[s] | awk '{ print $2 }'`
+if instrument_pids != "" then
+  warn "\n### There are other 'instrument' processes running that may interfere - consider terminating them first:\nkill -9 " + instrument_pids
 end
 
 # Find the bundle path at runtime
