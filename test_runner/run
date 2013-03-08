@@ -237,12 +237,14 @@ begin
           _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
           if status
-            status = parse_status(status) if status
-            outputs.each { |output| output.add_status(status, date, time, tz, msg) }
-            statistics[:total] = statistics[:total].to_i + 1 if status == :start
-            statistics[status] = statistics[status].to_i + 1
+            if options.verbose || status != "Debug"
+              status = parse_status(status) if status
+              outputs.each { |output| output.add_status(status, date, time, tz, msg) }
+              statistics[:total] = statistics[:total].to_i + 1 if status == :start
+              statistics[status] = statistics[status].to_i + 1
+            end
           else
-            outputs.each { |output| output.add(line) }
+            outputs.each { |output| output.add(line) } if options.verbose
           end
 
           failed = true if line =~ /Instruments Trace Error/i
