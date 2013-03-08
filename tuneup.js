@@ -3,3 +3,4 @@
 #import "uiautomation-ext.js"
 #import "screen.js"
 #import "test.js"
+#import "image_assertion.js"
