@@ -182,6 +182,18 @@ extend(UIATarget.prototype, {
     isDeviceiPhone: function() {
       return this.model().match(/^iPad/) === null &&
         this.name().match(/^iPad Simulator$/) === null;
+    },
+
+    /**
+     * A convenience method for producing screenshots without status bar
+     */
+    captureAppScreenWithName: function(imageName) {
+      var appRect = this.rect();
+
+      appRect.origin.y     += 20.0;
+      appRect.size.height  -= 20.0;
+
+      return this.captureRectWithName(appRect, imageName);
     }
 });
 extend(UIAKeyboard.prototype,{
