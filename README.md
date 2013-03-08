@@ -215,6 +215,28 @@ Tuneup can generate Xunit style reports that can be analyzed by
 any compatible tool, like Jenkins. Given the parameter `-x` a XML report
 will be generated in the output directory.
 
+## Screenshots assertion ##
+
+Tuneup can compare captured screen images against provided reference images and
+generate diff images for them. This function relies on `compare` utility from
+[ImageMagick](http://www.imagemagick.org). Steps to activate this feature:
+
+1. `brew install imagemagick`.
+2. In your test script create `ImageAsserter`:
+```javascript
+/**
+* tuneup_folder     - folder with tuneup sources
+* output_folder     - folder with test results
+* ref_images_folder - folder with you reference images
+**/
+createImageAsserter('tuneup_folder', 'output_folder', 'ref_images_folder');
+```
+
+3. Assert current screen against reference image with `assertScreenMatchesImageNamed`
+helper.
+4. Generated diff images are located in `screens_diff` subfolder of the output
+folder.
+
 # Note on Patches/Pull Requests #
 
   * Fork the project.
