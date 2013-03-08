@@ -193,6 +193,18 @@ extend(UIATarget.prototype, {
   		var deviceScreen = this.rect();
       	return isIphone && deviceScreen.size.height == 568;
      }
+
+    /**
+     * A convenience method for producing screenshots without status bar
+     */
+    captureAppScreenWithName: function(imageName) {
+      var appRect = this.rect();
+
+      appRect.origin.y     += 20.0;
+      appRect.size.height  -= 20.0;
+
+      return this.captureRectWithName(appRect, imageName);
+    }
 });
 extend(UIAKeyboard.prototype,{
   KEYBOARD_TYPE_UNKNOWN :-1,
