@@ -184,11 +184,6 @@ and reports should go.
 
 Run the script with `-h` or `--help` for a full explanation of supported options.
 
-The script relies on the `pgrep` command-line tool which you can install
-via [Homebrew](https://github.com/mxcl/homebrew):
-
-    brew install proctools
-
 ## Device or Simulator ##
 
 If you provide the optional argument `-d DEVICE`, you can tell Instruments
