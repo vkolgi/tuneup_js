@@ -182,7 +182,17 @@ extend(UIATarget.prototype, {
     isDeviceiPhone: function() {
       return this.model().match(/^iPad/) === null &&
         this.name().match(/^iPad Simulator$/) === null;
-    }
+    },
+	
+    /**
+     * A shortcut for checking if target device is iPhone 5 (or iPod Touch
+     * 5th generation)
+     */
+  	isDeviceiPhone5: function() {
+  		var isIphone = this.isDeviceiPhone();
+  		var deviceScreen = this.rect();
+      	return isIphone && deviceScreen.size.height == 568;
+     }
 });
 extend(UIAKeyboard.prototype,{
   KEYBOARD_TYPE_UNKNOWN :-1,
