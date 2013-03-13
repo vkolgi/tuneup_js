@@ -192,7 +192,7 @@ extend(UIATarget.prototype, {
   		var isIphone = this.isDeviceiPhone();
   		var deviceScreen = this.rect();
       	return isIphone && deviceScreen.size.height == 568;
-     }
+     },
 
     /**
      * A convenience method for producing screenshots without status bar
