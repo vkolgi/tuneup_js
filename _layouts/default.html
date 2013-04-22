@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>{{ page.title }}</title>
+  </head>
+
+  <body>
+    {% include menu.html %}
+    <div class="container">
+      <div class="inner">
+        <header>
+          <h1>Tuneup JS <img src="images/pitchfork.png" id="pitchfork"/></h1>
+          <h2>{{ page.description }}</h2>
+        </header>
+
+        {{ content }}
+
+        <footer>
+          Tuneup js is maintained by <a href="https://github.com/alexvollmer">alexvollmer</a><br>
+        </footer>
+
+      </div>
+    </div>
+  </body>
+</html>

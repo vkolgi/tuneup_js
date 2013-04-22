@@ -1,0 +1,289 @@
+---
+title: Assertions
+description: Learn how to use Tuneup’s assertions
+layout: page
+permalink: assertions.html
+---
+<p>
+  While the UIAutomation API provides a good interface to the UI, it doesn’t provide
+  a very succinct or elegant way to assert the state of your UI. That’s where
+  tuneup really shines.
+</p>
+
+<h2>The Basics</h2>
+<p>
+  At its core, tuneup’s assertion mechanism is built on throwing and catching
+  JavaScript exceptions. The <code>test</code> function catches any exceptions
+  thrown, logs the message of the exception and marks the test as a failure. All
+  of the assertions can be found in the <code>assertions.js</code> file if you’re
+  interested in the nitty-gritty of it all.
+</p>
+<p>
+  The two core functions are <code>fail</code> and <code>assertTrue</code>. The
+  first takes a string as its sole argument. The second one accepts any
+  JavaScript expression that evaluates to something "truthy" and a string message.
+  All of the other assertions are built on these two functions.
+</p>
+
+<h3>fail(message)</h3>
+<p>
+  Immediately throws a <code>FailureException</code> with the message given as
+  the sole argument to the function
+</p>
+
+<h3>assertTrue(expression, message)</h3>
+<p>
+  Asserts that the given expression is true and throws an
+  <code>AssertionException</code> with a default message, or the given
+  one (if provided).
+</p>
+
+<h3>assertFalse(expression, message)</h3>
+<p>
+  Asserts that the given expression is not true. If the expression is true
+  (according to <code>assertTrue</code>), an <code>AssertionException</code>
+  is thrown with a default message, or a custom one (if provided).
+</p>
+
+<h3>assertEquals(expected, received, message)</h3>
+<p>
+  Asserts that the received object matches the given object using the
+  <code>==</code> operator. If they are not equal, an <code>AssertionException</code>
+  is thrown with a default message, or a custom one (if provided).
+</p>
+
+<h3>assertNotEquals(expected, received, message)</h3>
+<p>
+  Asserts that the expected object does not match the received object using the
+  <code>!=</code> operator. If it is equal, an <code>AssertionException</code>
+  is thrown with a default message, or custom one (if provided).
+</p>
+
+<h3>assertMatch(regExp, expression, message)</h3>
+<p>
+  Asserts that the given regular expression successfully applies against the result
+  of the given expression. If it fails, an <code>AssertionException</code> is thrown
+  with a default message, or a custom one (if provided).
+</p>
+
+<h3>assertNull(expression, message)</h3>
+<p>
+  Asserts that the given expression is <i>either</i> <code>null</code> <i>or</i>
+  is a <code>UIAElementNil</code>, which is commonly used by UIAutomation as a
+  placeholder for conceptually null objects. If this is not the case, an
+  <code>AssertionException</code> is thrown with a default message or custom one
+  (if provided).
+</p>
+
+<h3>assertNotNull(expression, message)</h3>
+<p>
+  Asserts the opposite of <code>assertNull</code>.
+</p>
+
+<h2>Screen Assertions</h2>
+<p>
+  A common theme in writing integration tests for "screen flows" is the
+  repetitive cycle of making several assertions on a screen, then engaging some
+  user-control after all of the assertions pass. With the UIAutomation API as it
+  is, it's easy to lose sight of this structure when bogged down in the syntax of
+  asserting and navigating the user interface.
+</p>
+
+<p>
+  To make this cycle more obvious, and cut down on unnecessary verbosity, use the
+  <code>assertWindow</code> function. It works by applying a given JavaScript object literal
+  to the current main window (UIAWindow instance). Properties are nested in the object
+  literal in the same hierarchy as you would access them via UIAutomation’s API.
+</p>
+
+{% highlight javascript %}
+test("my test", function(target, app) {
+  mainWindow = app.mainWindow();
+  navBar = mainWindow.navigationBar();
+  leftButton = navBar.leftButton();
+  rightButton = navBar.rightButton();
+
+  assertEquals("Back", leftButton.name());
+  assertEquals("Done", rightButton.name());
+
+  tableViews = mainWindow.tableViews();
+  assertEquals(1, tableViews.length);
+  table = tableViews[0];
+
+  assertEquals("First Name", table.groups()[0].staticTexts()[0].name());
+  assertEquals("Last Name", table.groups()[1].staticTexts()[0].name());
+
+  assertEquals("Fred", table.cells()[0].name());
+  assertEquals("Flintstone", table.cells()[1].name());
+});
+{% endhighlight %}
+
+<p>With <code>assertWindow</code>, you can boil it down to this:</p>
+
+{% highlight javascript %}
+test("my test", function(target, app) {
+  assertWindow({
+    navigationBar: {
+      leftButton: { name: "Back" },
+      rightButton: { name: "Done" }
+    },
+    tableViews: [
+      {
+        groups: [
+          { name: "First Name" },
+          { name: "Last Name" }
+        ],
+        cells: [
+          { name: "Fred" },
+          { name: "Flintstone" }
+        ]
+      }
+    ]
+  });
+});
+{% endhighlight %}
+
+<p>
+  Note how the nested properties in the object literal match object-access path
+  of objects in the UIAutomation API.
+</p>
+<p>
+  For each property you wish to make an assertion about, you can specify a
+  string, number, regular expression or function. String and number values are
+  asserted using the <code>assertEquals</code> function. Regular expressions are
+  asserted using the <code>assertMatch</code> function. If a function is supplied,
+  it is simply evaluated. You can use any of the other assertion functions to match
+  inside of your custom function.
+</p>
+<p>
+  For UI properties that result in arrays (e.g. <code>tableViews()</code>), you need
+  to provide an array object with a matcher for each element in the array. These can
+  be a mix of strings, numbers, regular expressions or functions.
+</p>
+<p>
+  You can also pass <code>null</code> to match a property. This signals to tuneup
+  that you don’t care to match the property, but may be required to do so given
+  the structure for the UI. A common example of this is when you have an array of
+  UI elements and you only care to make an assertion about a few of them.
+</p>
+<p>
+  If the object literal you pass to <code>assertWindow</code> provides an
+  <code>onPass</code> property (pointing to a function), it will be invoked
+  if all of the matching assertions have passed.
+</p>
+
+{% highlight javascript %}
+assertWindow({
+   navigationBar: {
+     leftButton: { name: "Back" }
+   },
+   onPass: function(window) {
+     var leftButton = window.navigationBar().leftButton();
+     leftButton.tap();
+   }
+ });
+{% endhighlight %}
+
+<h3>Window Assertions for Univeral Applications</h3>
+<p>
+  If you have a Universal Application and want to maintain a single set of test files, you can mark specific properties to match by adding a "~ipad" or "~iphone" extension to the property name. When you do this, you need to quote the property name instead using a literal, like so:
+</p>
+
+{% highlight javascript %}
+test("my test", function(target, app) {
+  assertWindow({
+    "navigationBar~iphone": {
+      leftButton: { name: "Back" },
+      rightButton: { name: "Done" }
+    },
+    "navigationBar~ipad": {
+      leftButton: null,
+      rightButton: { name: "Cancel" }
+    },
+  });
+});
+{% endhighlight %}
+
+<p>
+  Note that the "~iphone" extension should work for iPod Touch devices also.
+</p>
+<p>
+  This convention is derived for how device-specific images are loaded on both iPad and iPhone/iPod devices. Hopefully it looks somewhat familiar.
+</p>
+
+<h2>Screenshots assertion</h2>
+
+<p>
+  Tuneup can compare captured screen images against provided reference images and
+  generate diff images for them. This function relies on <code>compare</code> utility from
+  <a href="http://www.imagemagick.org">ImageMagick</a>. Steps to activate this feature:
+</p>
+
+<ol>
+  <li>
+    <code>brew install imagemagick</code>.
+  </li>
+  <li>
+    <p>In your test script create an <code>ImageAsserter</code>:</p>
+
+{% highlight javascript %}
+/**
+ * tuneup_folder     - folder with tuneup sources
+ * output_folder     - folder with test results
+ * ref_images_folder - folder with you reference images
+ **/
+createImageAsserter('tuneup_folder', 'output_folder', 'ref_images_folder');
+{% endhighlight %}
+  </li>
+  <li>
+    <p>
+      Assert current screen against reference image with the
+      <code>assertScreenMatchesImageNamed()</code> function. The first argument is
+      the name of the image on-disk found in the <code>ref_images_folder</code>
+      you specified in the previous step. The second argument is an optional custom
+      message if the screen doesn’t match the given image.
+    </p>
+    <p>
+      To avoid false mis-matches, the image assertion mechanism automatically ignores
+      the top 20 points of the screen which is normally occupied by the iOS-provided
+      status bar.
+    </p>
+  </li>
+  <li>
+    <p>
+      Generated diff images are located in <code>screens_diff</code> subfolder of the output
+      folder.
+    </p>
+  </li>
+</ol>
+
+<h2>Retrying Assertions</h2>
+<p>
+  There are times in UIAutomation when you there is an indeterminate amount of time
+  between when you exercise the app and state change has been made (think of tapping
+  a table cell to navigate to sub-screen). This can result in false test failures because
+  your assertions are being executed too quickly.
+</p>
+<p>
+  UIAutomation does provide a timeout mechanism and the ability to pause test script
+  execution, but this is pretty hacky and a bit unwieldy. Tuneup provides a
+  <code>retry()</code> function that allows you to package up assertions in a
+  JavaScript function that will be retried a number of times until it passes or until
+  it timesout. This results in more readable code, and potentially quicker test
+  execution times.
+</p>
+<p>
+  The <code>retry()</code> function takes a number of optional arguments. The first
+  is a JavaScript function to execute. In here, you make whatever assertions you like.
+  The second and third <i>optional</i> arguments specify the maximum number of retries
+  and the time to wait between each attempt, relatively.  The default value is three
+  attempts with a delay of 0.5 seconds between each invocation.
+</p>
+
+<p>Here’s an example:</p>
+</p>
+{% highlight javascript %}
+retry(function() {
+  assertEquals("Login", window.navigationBars()[0].name());
+});
+{% endhighlight %}

@@ -1,0 +1,67 @@
+---
+layout: page
+title: Writing Tests
+description: Learn how to write UIAutomation tests using Tuneup JS
+permalink: writing.html
+---
+<p>
+  One of tuneup’s primary goals is making tests as easy to read as they are easy to write. This is done by grouping actions and assertions together in logical testing units. These tests are idenfitied by a call to the <a href="structure.html#test"><code>test</code></a> JavaScript function. In order for you to use this function, you need to import tuneup into the JavaScript runtime.
+</p>
+
+<h2>Step 1: Import Tuneup JS</h2>
+<p>
+  To import tuneup, use the <code>#import</code> statement provided by
+  UIAutomation’s JavaScript runtime. The exact path you use will depend on where
+  your tests are located and how you’ve installed tuneup.
+</p>
+
+<p>
+  Let’s assume that you have a directory for your tests located in
+  <code>integration</code> at the root of your project file. If you installed it
+  using <a href="/installation.html#cocoapods">CocoaPods</a>, then your import
+  statement will look like this:
+</p>
+
+<pre><code>#import "../Pods/tuneup_js/tuneup.js"</code></pre>
+
+<p>
+  If you’ve installed tuneup <a href="/installation.html#manual">manually</a>,
+  then you will need to figure out the correct path to the <code>tunup.js</code> file.
+</p>
+
+<h2>Step 2: Declare a Test</h2>
+<p>
+  In your test file, the next thing you need to do is declare a new test using the
+  <a href="/structure.html#test">test</a> function. The function takes
+  two arguments: a string title for your test and a JavaScript function that accepts
+  two parameters named <code>target</code> and <code>app</code>.
+</p>
+
+{% highlight javascript %}
+test("Login screen", function(target, app) {
+  // do cool stuff in here
+});
+{% endhighlight %}
+
+<h2>Step 3: Exercise and Validate</h2>
+<p>
+  Once you have a test declared, you fill the body of the function with JavaScript statements
+  to exercise the UI using the UIAutomation API, and validate the state and behavior of the
+  application using tuneup’s <a href="/assertions.html">assertion functions</a>.
+</p>
+
+{% highlight javascript %}
+test("Login screen", function(target, app) {
+  var window = app.mainWindow();
+
+  // tap the left button in the navigation bar
+  window.navigationBars()[0].leftButton().tap();
+
+  // now assert that the app has navigated into a sub-view controller
+  assertEquals("Settings", window.navigationBars()[0].value());
+});
+{% endhighlight %}
+
+<p>
+  Once you’ve written your test, it’s time to <a href="/running.html">run it</a>.
+</p>

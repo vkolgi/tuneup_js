@@ -1,0 +1,41 @@
+---
+layout: page
+title: Installation
+description: There are two ways to install tuneup, the easy way and the easier way.
+permalink: installation.html
+---
+<p>
+  There are two ways you can setup tuneupjs in your project: you can install it
+  manually, or you can use <a href="http://www.cocoapods.org">CocoaPods</a>.
+</p>
+
+<h2><a name="cocoapods">CocoaPods</a></h2>
+<p>
+  Setting up tuneup using CocoaPods is the preferred way to install tuneup.
+</p>
+
+<h3>Step 1</h3>
+<p>
+  In your
+  <code>Podfile</code> add a line for "tuneup_js" like this:
+{% highlight ruby %}
+platform :ios
+pod 'tuneup_js'
+# other pods go here
+{% endhighlight %}
+</p>
+
+<h3>Step 2</h3>
+<p>
+  Update your installed pods by running <code>pod install</code>. This will create a sub-folder named <code>tuneup_js</code> in your <code>Pods</code> directory.
+</p>
+
+<p>
+  Now you’re ready to <a href="writing.html">write</a> and <a href="running.html">run</a> some tests.
+</p>
+
+<h2><a name="manual">Manual Installation</a></h2>
+<p>
+  Create a subdirectory in your current project and either manually copy the
+  <code>tuneup_js</code> files there, or add <code>tuneup_js</code> as a git submodule.
+</p>

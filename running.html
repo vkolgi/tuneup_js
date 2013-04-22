@@ -1,0 +1,122 @@
+---
+layout: page
+title: Running Tests
+description: Learn how to run UIAutomation tests using Tuneup JS
+permalink: running.html
+---
+<p>
+  There are three primary ways to run UIAutomation tests using tuneup.
+</p>
+
+<h2>Using Bwoken (recommended!)</h2>
+<p>
+  <a href="https://github.com/bendyworks/bwoken">Bwoken</a> is a robust command-line
+  executable for running UIAutomation tests. It has nearly all of the benefits of
+  tuneup’s built-in test runner plus:
+  <ul>
+    <li>built-in support for <a href="http://www.coffeescript.org">CoffeeScript</a></li>
+    <li>automatic device-detection</li>
+    <li>integration with <a href="http://rake.rubyforge.org">Rake</a></li>
+  </ul>
+</p>
+
+<p>
+  Install Bwoken using <a href="http://gembundler.org">Bundler</a>. Once you have it
+  installed, adjust your <code>#import</code> statement according to how you installed
+  tuneup. If you’re using CocoaPods, your import path should be
+  <code>#import "../../../../Pods/tuneup_js/tunup.js"</code>.
+</p>
+
+<h2>Using The Built-in Test Runner (deprecated)</h2>
+<p>
+  Tuneup JS comes with its own test-runner script. It hides a lot of the ugly complexity
+  of the <code>instruments</code> command-line executable. It also provides for better
+  formatting of output. For details on running tests with this tool, execute
+  <code>test_runner/run -h</code> in a terminal window for a detailed explanation of
+  the command-line usage and options.
+</p>
+<p>
+  Note that, while the built-in test runner works and has had a lot of great contributions
+  made, further support of it has been deprecated because Bwoken provides a much more
+  robust feature-set.
+</p>
+<p>
+  Starting in iOS 5, Apple provided a way to run Instruments from the
+  command-line. However, it's a bit fiddly and is very general-purpose
+  so doing anything <em>useful</em> with the output is kind of a pain.
+</p>
+
+<p>
+  Tuneup provides a Ruby script (<code>test_runner/run</code>) to run your test scripts.
+  The runner will parse the output of your test and produce a proper
+  UNIX exit code based on whether or not your tests succeeded. It also
+  provides some niceties like automatically specifying the full-path
+  to your test script if you don't provide one.
+</p>
+
+<p>
+  Have a look at <code>test_runner/run --help</code> to be sure you're not missing any newly
+  added features like fancy colors.
+</p>
+
+<p>To use the runner, invoke it like so:</p>
+
+<pre><code>[path to tuneup]/test_runner/run &lt;app bundle&gt; &lt;test script&gt; &lt;output directory&gt; [optional args]
+</code></pre>
+
+<p>
+  Normally the name of the app bundle will suffice for the <code>&lt;app bundle&gt;</code>
+  argument. If you're running your tests on the simulator the newest bundle
+  will be located automatically. If that fails, or if you want to manually
+  specify the bundle to be used, you need to provide a <em>fully-qualified</em>
+  path to the app bundle, which will be buried somewhere in
+  <code>~/Library/Developer/Xcode/DerivedData</code>.
+</p>
+
+<p>
+  The <code>&lt;test script&gt;</code> argument specifies the JavaScript test file and the
+  <code>&lt;output directory&gt;</code> is where the resulting Instruments output like screenshots
+  and reports should go.
+</p>
+
+<p>
+  Run the script with <code>-h</code> or <code>--help</code> for a full explanation
+  of supported options.
+</p>
+
+<h3>Device or Simulator</h3>
+
+<p>
+  If you provide the optional argument <code>-d DEVICE</code>, you can tell Instruments
+  to run your test against a real device (identified by UDID). You can also
+  pass <code>dynamic</code> and tuneup will find the UDID at runtime. If this argument is
+  not provided, the runner will run against the simulator.
+</p>
+
+<h3>Preprocessing</h3>
+<p>
+  The Instruments preprocessor causes a lot of headache due to its inability
+  to handle <code>#import</code> statements properly. If you pass <code>-p</code>,
+  the script will create a temp file, resolve any imports and inline the referenced
+  files (only once).
+</p>
+
+<h3>Selecting Tests</h3>
+<p>
+  If you don't want to run your whole test suite, you can selectively run
+  tests by specifying the argument <code>-r TEST</code>. Whatever you pass for
+  <code>TEST</code> will be used as regex to match any <code>title</code> of your tests.
+</p>
+
+<h3>XML reports</h3>
+<p>
+  Tuneup can generate Xunit style reports that can be analyzed by
+  any compatible tool, like Jenkins. Given the parameter <code>-x</code> a XML report
+  will be generated in the output directory.
+</p>
+
+<h2>Using Instruments</h2>
+<p>
+  There’s nothing special required to run tuneup within Instruments aside from getting
+  the path correct in your initial <code>#import</code> statement.
+</p>
