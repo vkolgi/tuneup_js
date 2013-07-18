@@ -8,22 +8,35 @@ function extend(destination, source) {
   return destination;
 }
 
+extend(Object.prototype, {
 /**
  * Dump the properties out a String returned by the function.
  */
-function dumpProperties(obj) {
-  var dumpStr = "";
-  for (var propName in obj) {
-    if (obj.hasOwnProperty(propName)) {
-      if (dumpStr !== "") {
-        dumpStr += ", ";
+  dumpProperties: function() {
+    var dumpStr = "";
+    for (var propName in this) {
+      if (this.hasOwnProperty(propName)) {
+        if (dumpStr !== "") {
+          dumpStr += ", ";
+        }
+        dumpStr += (propName + "=" + this[propName]);
       }
-      dumpStr += (propName + "=" + obj[propName]);
     }
-  }
 
-  return dumpStr;
-}
+    return dumpStr;
+  },
+
+  getMethods: function() {
+    var methods = [];
+    for (var m in this) {
+      //if (typeof this[m] == "function" && this.hasOwnProperty(m)) {
+      if (typeof this[m] == "function") {
+        methods.push(m);
+      }
+    }
+    return methods;
+  }
+});
 
 extend(Array.prototype, {
   /**
@@ -37,6 +50,14 @@ extend(Array.prototype, {
       }
     }
     return null;
+  },
+
+  unique:  function() {
+    function onlyUnique(value, index, self) {
+      return self.indexOf(value) === index;
+    }
+
+    return this.filter(onlyUnique);
   }
 });
 
@@ -52,3 +73,6 @@ String.prototype.rtrim = function() {
   return this.replace(/\s+$/,"");
 };
 
+String.prototype.lcfirst = function() {
+  return this.charAt(0).toLowerCase() + this.substr(1);
+};
