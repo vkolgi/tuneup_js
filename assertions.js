@@ -285,7 +285,7 @@ function assertWindow(window) {
 
 /**
  * Asserts that the +expected+ object matches the +given+ object by making
- * assertions appropriate based on the pe of each property in the
+ * assertions appropriate based on the type of each property in the
  * +expected+ object. This method will recurse through the structure,
  * applying assertions for each matching property path. See the description
  * for +assertWindow+ for details on the matchers.
@@ -327,7 +327,14 @@ function assertPropertiesMatch(expected, given, level) {
       }
 
       if (givenProp === null) {
-          throw new AssertionException("Could not find given " + given + " property named: " + propName);
+        throw new AssertionException("Could not find given " + given + " property named: " + propName);
+      } else {
+        var objType = Object.prototype.toString.call(givenProp);
+        if (objType == "[object UIAElementNil]") {
+          throw new AssertionException("found no elements for " + given.toString() + '.' + propName + "()");
+        } else if (objType == "[object Undefined]") {
+          throw new AssertionException(given.toString() + '.' + propName + "() method not found.");
+        }
       }
 
       try {
@@ -341,6 +348,8 @@ function assertPropertiesMatch(expected, given, level) {
           assertEquals(expectedProp, givenProp);
         } else if (expectedPropType == "number") {
           assertEquals(expectedProp, givenProp);
+        } else if (expectedPropType == "boolean") {
+          assertEquals(expectedProp, givenProp);
         } else if (expectedPropType == "function") {
           if (expectedProp.constructor == RegExp) {
             assertMatch(expectedProp, givenProp);
@@ -349,11 +358,18 @@ function assertPropertiesMatch(expected, given, level) {
           }
         } else if (expectedPropType == "object") {
           if (expectedProp.constructor === Array) {
-            var expectedPropLength = expectedProp.length;
-            for (var i = 0; i < expectedPropLength; i++) {
+            assertEquals(expectedProp.length, givenProp.length);
+            for (var i = 0; i < expectedProp.length; i++) {
               var exp = expectedProp[i];
               var giv = givenProp[i];
-              assertPropertiesMatch(exp, giv, level + 1);
+              try {
+                assertPropertiesMatch(exp, giv, level + 1);
+              } catch(e2) {
+                if (e2.constructor == Array) {
+                  e2[0] = '[' + i + ']' + '.' + e2[0];
+                }
+                throw e2;
+              }
             }
           } else if (expectedProp.constructor === RegExp) {
             assertMatch(expectedProp, givenProp);
@@ -369,15 +385,10 @@ function assertPropertiesMatch(expected, given, level) {
         }
       }
       catch(e1) {
-        UIALogger.logError("Got an exception: " + e1);
         if (e1.constructor == Array) {
           e1[0] = propName + "." + e1[0];
-          throw e1;
         }
-        else {
-          var err = [propName, e1];
-          throw err;
-        }
+        throw e1;
       }
     }
   }
