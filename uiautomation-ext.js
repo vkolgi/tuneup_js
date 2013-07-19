@@ -336,7 +336,7 @@ extend(UIATarget.prototype, {
       return this.model().match(/^iPad/) === null &&
         this.name().match(/^iPad Simulator$/) === null;
     },
-	
+
     /**
      * A shortcut for checking if target device is iPhone 5 (or iPod Touch
      * 5th generation)
@@ -357,6 +357,15 @@ extend(UIATarget.prototype, {
       appRect.size.height  -= 20.0;
 
       return this.captureRectWithName(appRect, imageName);
+    },
+
+    logDeviceInfo: function() {
+        UIALogger.logMessage("Dump Device:");
+        UIALogger.logMessage("  model: " + this.model());
+        UIALogger.logMessage("  rect: " + JSON.stringify(this.rect()));
+        UIALogger.logMessage("  name: "+ this.name());
+        UIALogger.logMessage("  systemName: "+ this.systemName());
+        UIALogger.logMessage("  systemVersion: "+ this.systemVersion());
     }
 });
 extend(UIAKeyboard.prototype,{
