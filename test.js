@@ -14,10 +14,10 @@
  *   // exercise and validate your application.
  * });
  *
- * The +title+ is checked against every element of a global TUNEUP_ONLY_RUN 
- * array. To check, each element is converted to a RegExp. The test is only 
+ * The +title+ is checked against every element of a global TUNEUP_ONLY_RUN
+ * array. To check, each element is converted to a RegExp. The test is only
  * executed, if one check succeeds. If TUNEUP_ONLY_RUN is not defined,
- * no checks are performed. 
+ * no checks are performed.
  */
 function test(title, f, options) {
   if (typeof TUNEUP_ONLY_RUN !== 'undefined') {
@@ -30,12 +30,14 @@ function test(title, f, options) {
         }
     }
   }
-  
+
   if (!options) {
     options = {
-      logTree: true
+      logTree: true,
+      logTreeJSON: false,
+      screenCapture: true
     };
-  }  
+  }
   target = UIATarget.localTarget();
   application = target.frontMostApp();
   UIALogger.logStart(title);
@@ -46,6 +48,8 @@ function test(title, f, options) {
   catch (e) {
     UIALogger.logError(e.toString());
     if (options.logTree) target.logElementTree();
+    if (options.logTreeJSON) application.mainWindow().logElementTreeJSON();
+    if (options.screenCapture) target.captureScreenWithName(title + '-fail');
     UIALogger.logFail(title);
   }
 }
