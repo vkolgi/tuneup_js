@@ -21,6 +21,159 @@ extend(UIATableView.prototype, {
 
 extend(UIAElement.prototype, {
 	/**
+	 * Dump tree in json format for copy/paste use in AssertWindow and friends
+	 */
+
+	elementJSONDump: function (recursive, attributes, visibleOnly) {
+        if (visibleOnly && !this.isVisible())
+        {
+            return "";
+        }
+
+        if (!attributes)
+        {
+            attributes = ["name", "label", "value", "isVisible"];
+        }
+        else if (attributes == 'ALL')
+        {
+            attributes = ["name", "label", "value"].concat(
+                this.getMethods().filter(function(method) { return method.match(/^(is|has)/) })
+            );
+        }
+
+        var jsonStr = "";
+        attributes.forEach(function(attr)
+        {
+            try {
+                var value = this[attr]();
+                if (value != null) //don't print null values
+                {
+                    var valueType = typeof(value);
+                    //quote strings and numbers.  true/false unquoted.
+                    if (valueType == "string"
+                        || valueType == "number")
+                    {
+                        value = "'" + value + "'";
+                    }
+                    jsonStr += attr + ': ' + value + ',\n';
+                }
+            } catch (e) { }
+        }, this);
+
+        if (recursive)
+        {
+            var children = this.elements().toArray();
+            if (children.length > 0)
+            {
+                var curType = null;
+                children.sort().forEach(function(child)
+                {
+                    function elementTypeToUIAGetter(elementType, parent)
+                    {
+                        //almost all types follow a simple name to getter convention.
+                        //UIAImage => images.  UIAWindow => windows.
+                        var getter = elementType.substring(3).lcfirst() + 's';
+                        if (elementType == "UIACollectionCell"
+                            || elementType == "UIATableCell")
+                        {
+                            getter = "cells";
+                        }
+                        if (parent && !eval('parent.' + getter))
+                        {
+                            //Note: we can't use introspection to list valid methods on the parents
+                            //because they are all "native" methods and aren't visible.
+                            //so the valid getter must be looked up in the documentation and mapped above
+                            UIALogger.logError("elementTypeToUIAGetter could not determine getter for "
+                                + elementType);
+                        }
+                        return elementType.substring(3).lcfirst() + 's';
+                    }
+
+                    var objType = Object.prototype.toString.call(child);  //[object UIAWindow]
+                    objType = objType.substring(8, objType.length-1);    //UIAWindow
+                    // there's a bug that causes leaf elements to have child references
+                    // back up to UIAApplication, thus the check for that
+                    // this means we can't dump from the "target" level - only mainWindow and below
+                    // hopefully this bug goes away 2013-07-02
+                    if (objType == "UIAApplication"
+                        || objType == "UIAElementNil"
+                        || (visibleOnly && !child.isVisible())
+                        )
+                    {
+                        //skip this child
+                        return;
+                    }
+
+                    if (objType == "UIACollectionCell"
+                        && !this.isVisible())
+                    {
+                        //elements() shows invisible cells that cells() does not
+                        return;
+                    }
+                    if (curType && curType != objType)
+                    {
+                        //close off open list
+                        jsonStr += "],\n";
+                    }
+                    if (!curType || curType != objType)
+                    {
+                        curType = objType;
+                        //open a new list
+                        jsonStr += elementTypeToUIAGetter(objType, this) + ": [\n";
+                    }
+
+                    var childJsonStr = child.elementJSONDump(true, attributes, visibleOnly);
+                    if (childJsonStr)
+                    {
+                        jsonStr += "{\n";
+                        jsonStr += childJsonStr.replace(/^/gm, "    ").replace(/    $/, '');
+                        jsonStr += "},\n";
+                    } else {
+                        //child has no attributes to report (all null)
+                        jsonStr += "    null,\n";
+                    }
+
+                }, this);
+                if (curType)
+                {
+                    //close off open list
+                    jsonStr += "],\n";
+                }
+            }
+        }
+
+        return jsonStr;
+	},
+
+	logElementJSON: function (attributes) {
+        //TODO dump the path to the object in the debug line
+        //ex: target.frontMostApp().mainWindow().toolbars()[0].buttons()["Library"]
+        UIALogger.logDebug("logElementJSON: "
+                + (attributes ? "[" + attributes + "]" : '')
+                + "\n" + this.elementJSONDump(false, attributes));
+    },
+
+	logVisibleElementJSON: function (attributes) {
+        //TODO dump the path to the object in the debug line
+        //ex: target.frontMostApp().mainWindow().toolbars()[0].buttons()["Library"]
+        UIALogger.logDebug("logVisibleElementJSON: "
+                + (attributes ? "[" + attributes + "]" : '')
+                + "\n" + this.elementJSONDump(false, attributes, true));
+    },
+
+	logElementTreeJSON: function (attributes) {
+        UIALogger.logDebug("logElementTreeJSON: "
+                + (attributes ? "[" + attributes + "]" : '')
+                + "\n" + this.elementJSONDump(true, attributes));
+    },
+
+	logVisibleElementTreeJSON: function (attributes) {
+        UIALogger.logDebug("logVisibleElementTreeJSON: "
+                + (attributes ? "[" + attributes + "]" : '')
+                + "\n" + this.elementJSONDump(true, attributes, true));
+    },
+
+	/**
 	 * Poll till the item becomes visible, up to a specified timeout
 	 */
 	waitUntilVisible: function (timeoutInSeconds) {
@@ -183,7 +336,7 @@ extend(UIATarget.prototype, {
       return this.model().match(/^iPad/) === null &&
         this.name().match(/^iPad Simulator$/) === null;
     },
-	
+
     /**
      * A shortcut for checking if target device is iPhone 5 (or iPod Touch
      * 5th generation)
@@ -204,6 +357,15 @@ extend(UIATarget.prototype, {
       appRect.size.height  -= 20.0;
 
       return this.captureRectWithName(appRect, imageName);
+    },
+
+    logDeviceInfo: function() {
+        UIALogger.logMessage("Dump Device:");
+        UIALogger.logMessage("  model: " + this.model());
+        UIALogger.logMessage("  rect: " + JSON.stringify(this.rect()));
+        UIALogger.logMessage("  name: "+ this.name());
+        UIALogger.logMessage("  systemName: "+ this.systemName());
+        UIALogger.logMessage("  systemVersion: "+ this.systemVersion());
     }
 });
 extend(UIAKeyboard.prototype,{
