@@ -19,7 +19,7 @@ end
 assertion_result = ImageAssertion.assert_image(File.expand_path(test_output),
                                                File.expand_path(ref_images_path),
                                                image_name,
-                                              threshold)
+                                               threshold)
 exit FAILED_EXIT_STATUS unless assertion_result
 
 exit SUCCESS_EXIT_STATUS

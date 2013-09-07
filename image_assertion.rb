@@ -58,15 +58,16 @@ private
 
     #imagemagick outputs floating point metrics value when succeeds
     compare_succeed = ( stderr.match(/[0-9]*\.?[0-9]+/).length > 0 )
+    threshold ||= MAX_ALLOWED_DIFF_VALUE
 
     if compare_succeed
-      if (threshold.nil? && stderr.to_f < MAX_ALLOWED_DIFF_VALUE) || (!threshold.nil? && stderr.to_f < threshold.to_f)
+      if stderr.to_f < threshold
 
         result_status   = 'passed'
         result_message  = "#{image_file_name} asserted successfully."
         assertionResult = true
       else
-        print_status(create_status(result_status, "expected diff is smaller than #{threshold.nil? ? MAX_ALLOWED_DIFF_VALUE : threshold} but #{stderr.to_f}."))
+        print_status(create_status(result_status, "expected diff is smaller than #{threshold} but #{stderr.to_f}."))
       end
     else
 
