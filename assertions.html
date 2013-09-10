@@ -256,6 +256,12 @@ createImageAsserter('tuneup_folder', 'output_folder', 'ref_images_folder');
     </p>
   </li>
 </ol>
+<p>
+  Note that the <code>createImageAsserter</code> function can take an optional fourth
+  argument to override the default image-tolerance when comparing images. The default
+  value should work in most cases, but may be useful to override if you are getting
+  unexpected test failures.
+</p>
 
 <h2>Retrying Assertions</h2>
 <p>
