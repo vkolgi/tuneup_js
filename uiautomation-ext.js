@@ -231,8 +231,12 @@ extend(UIAElement.prototype, {
               if(!conditionFunction(filteredElement)) {
                  if (filteredElement.toString() == "[object UIAElementNil]") {
                     throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
-                 } else {
-                    throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 } else { 
+                    var elementDescription = filteredElement.toString();
+                    if (filteredElement.name !== undefined && filteredElement.name != null && fileredElement.name != "") {
+                      elementDescription += " with name '" + filteredElement.name + "'";
+                    } 
+                    throw(["Element", elementDescription, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
                  }
               }
           }, Math.max(1, timeoutInSeconds/delay), delay);
