@@ -203,7 +203,7 @@ extend(UIAElement.prototype, {
             return element.elements().firstWithName(name);
         }, function(element) {
             return element.isValid();
-        }, timeoutInSeconds, "to become valid");
+        }, timeoutInSeconds, ["to become valid (with name '", name, "')"].join(""));
     },
 
     /**
@@ -214,7 +214,7 @@ extend(UIAElement.prototype, {
             return element.elements().firstWithName(name);
         }, function(element) {
             return !element.isValid();
-        }, timeoutInSeconds, "to become invalid");
+        }, timeoutInSeconds, ["to become invalid (with name '", name, "'')"].join(""));
     },
 
     /**
