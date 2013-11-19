@@ -229,7 +229,11 @@ extend(UIAElement.prototype, {
           retry(function() {
               var filteredElement = filterFunction(element);
               if(!conditionFunction(filteredElement)) {
-                  throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 if (filteredElement.toString() == "[object UIAElementNil]") {
+                    throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 } else {
+                    throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 }
               }
           }, Math.max(1, timeoutInSeconds/delay), delay);
         } catch (e) {
