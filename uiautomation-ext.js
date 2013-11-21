@@ -233,7 +233,7 @@ extend(UIAElement.prototype, {
                     throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
                  } else { 
                     var elementDescription = filteredElement.toString();
-                    if (filteredElement.name !== undefined && filteredElement.name != null && fileredElement.name != "") {
+                    if (filteredElement.name !== undefined && filteredElement.name != null && filteredElement.name != "") {
                       elementDescription += " with name '" + filteredElement.name + "'";
                     } 
                     throw(["Element", elementDescription, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
