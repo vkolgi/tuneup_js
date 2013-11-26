@@ -229,7 +229,7 @@ extend(UIAElement.prototype, {
           retry(function() {
               var filteredElement = filterFunction(element);
               if(!conditionFunction(filteredElement)) {
-                 if (filteredElement.toString() == "[object UIAElementNil]") {
+                 if (filteredElement == null ||  filteredElement.toString() == "[object UIAElementNil]") {
                     throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
                  } else { 
                     var elementDescription = filteredElement.toString();
