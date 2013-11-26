@@ -217,6 +217,35 @@ extend(UIAElement.prototype, {
         }, timeoutInSeconds, ["to become invalid (with name '", name, "'')"].join(""));
     },
 
+
+    /**
+     * Wait until lookup_function(this) returns a valid lookup
+     */
+    waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
+        var isNotUseless = function (elem) {
+            var ret = undefined !== elem
+            && null != elem
+            && elem.toString() != "[object UIAElementNil]";
+            return ret;
+        };
+        
+        if (!isNotUseless(this)) {
+            throw "waitUntilAccessorSuccess: won't work because the top element isn't valid";
+        }        
+
+        this.waitUntil(function(element) {
+            try {
+                return lookup_function(element);
+            } catch (e) {
+                return null;
+            }
+        }, isNotUseless,
+        timeoutInSeconds, "to become an acceptable return value from the given function");
+        return lookup_function(this);
+    },
+
+  
+
     /**
      * Wait until element fulfills condition
      */
