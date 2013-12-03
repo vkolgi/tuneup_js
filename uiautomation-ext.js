@@ -270,9 +270,12 @@ extend(UIAElement.prototype, {
               }
           }, Math.max(1, timeoutInSeconds/delay), delay);
         } catch (e) {
-          UIATarget.localTarget().popTimeout();
           throw e;
         }
+        finally {
+          UIATarget.localTarget().popTimeout();
+        }
+
     },
 
   /**
