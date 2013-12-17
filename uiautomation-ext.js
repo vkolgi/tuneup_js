@@ -224,12 +224,21 @@ extend(UIAElement.prototype, {
         timeoutInSeconds = timeoutInSeconds == null ? 5 : timeoutInSeconds;
         var element = this;
         var delay = 0.25;
-        retry(function() {
-            var filteredElement = filterFunction(element);
-            if(!conditionFunction(filteredElement)) {
-                throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
-            }
-        }, Math.max(1, timeoutInSeconds/delay), delay);
+        UIATarget.localTarget().pushTimeout(0);
+        try {
+          retry(function() {
+              var filteredElement = filterFunction(element);
+              if(!conditionFunction(filteredElement)) {
+                  throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+              }
+          }, Math.max(1, timeoutInSeconds/delay), delay);
+        } catch (e) {
+          throw e;
+        }
+        finally {
+          UIATarget.localTarget().popTimeout();
+        }
+
     },
 
   /**
