@@ -242,8 +242,8 @@ begin
             mytimeout = options.timeout
           end
           if IO.select([r], nil, nil, mytimeout) then
-            started = true
             line = r.readline.rstrip
+            started = true if line.include? " +0000 "
 
             _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
