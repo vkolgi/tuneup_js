@@ -224,16 +224,18 @@ def format_statistics(statistics)
 end
 
 statistics = {}
-started = false
 failed = false
+started = false
 remaining_attempts = 10
 
-begin
+while ((not started) && (remaining_attempts > 0)) do
+  statistics = {}
+  failed = false
+  remaining_attempts = remaining_attempts - 1
+  warn "\n### Launching instruments.  Will retry #{remaining_attempts} more times if it doesn't initialize"
 
-  Dir.chdir(test_output) do
-    while not started && remaining_attempts > 0 do
-      remaining_attempts = remaining_attempts - 1
-      warn "\n### Launching instruments.  Will retry #{remaining_attempts} more times if it doesn't initialize"
+  begin
+    Dir.chdir(test_output) do
 
       PTY.spawn(*command) do |r, w, pid|
         while not failed do
@@ -276,20 +278,20 @@ begin
         end
       end
     end
-  end
 
-rescue Errno::EIO
-rescue EOFError
-rescue PTY::ChildExited
-  STDERR.puts "Instruments exited unexpectedly"
-  exit 1
-ensure
-  outputs.map(&:close)
+  rescue Errno::EIO
+  rescue EOFError
+  rescue PTY::ChildExited
+    STDERR.puts "Instruments exited unexpectedly"
+    exit 1
+  ensure
+    outputs.map(&:close)
 
-  if temp_file
-    temp_file.close
-    temp_file.unlink
-    puts "Deleted temp file" if options.verbose
+    if temp_file
+      temp_file.close
+      temp_file.unlink
+      puts "Deleted temp file" if options.verbose
+    end
   end
 end
 
