@@ -233,6 +233,7 @@ begin
   Dir.chdir(test_output) do
     while not started && remaining_attempts > 0 do
       remaining_attempts = remaining_attempts - 1
+      warn "\n### Launching instruments.  Will retry #{remaining_attempts} more times if it doesn't initialize"
 
       PTY.spawn(*command) do |r, w, pid|
         while not failed do
