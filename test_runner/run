@@ -12,6 +12,8 @@ require File.expand_path(File.join(File.dirname(__FILE__), "xunit_output"))
 
 options = OpenStruct.new
 options.env_vars = {}
+options.attempts = 1
+options.startup_timeout = 30
 
 opts_parser = OptionParser.new do |opts|
   opts.banner = "USAGE: run-test-script <app bundle> <test script> <output directory> [optional args]" +
@@ -63,6 +65,16 @@ opts_parser = OptionParser.new do |opts|
 
   opts.on("-l", "--language=en", "Use language to simulator") do |l|
     options.language = "-AppleLanguages \(#{l}\)"
+  end
+
+  opts.on("-a", "--attempts ATTEMPTS", OptionParser::DecimalInteger,
+          "Number of times to attempt a successful test run in Instruments (reliability hack)") do |a|
+    options.attempts = a
+  end
+
+  opts.on("-s", "--startuptimeout DURATION", OptionParser::DecimalInteger,
+          "Amount of time to wait for output from Instruments scripts before judging it to be hung") do |t|
+   options.startup_timeout = t
   end
 end
 
@@ -226,9 +238,9 @@ end
 statistics = {}
 failed = false
 started = false
-remaining_attempts = 10
+remaining_attempts = options.attempts
 
-while ((not started) && (remaining_attempts > 0)) do
+while not started && remaining_attempts > 0 do
   statistics = {}
   failed = false
   remaining_attempts = remaining_attempts - 1
@@ -240,7 +252,7 @@ while ((not started) && (remaining_attempts > 0)) do
       PTY.spawn(*command) do |r, w, pid|
         while not failed do
           if not started then
-            mytimeout = 30
+            mytimeout = options.startup_timeout
           else
             mytimeout = options.timeout
           end
