@@ -258,7 +258,9 @@ while (not started) && remaining_attempts > 0 do
           end
           if IO.select([r], nil, nil, mytimeout) then
             line = r.readline.rstrip
-            started = true if line.include? " +0000 "
+            if (line.include? " +0000 ") && (not line.include? " +0000 Fail: The target application appears to have died") then 
+              started = true
+            end
 
             _, date, time, tz, status, msg = line.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{4}) ([^:]+): (.*)$/).to_a
 
