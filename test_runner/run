@@ -240,7 +240,7 @@ failed = false
 started = false
 remaining_attempts = options.attempts
 
-while not started && remaining_attempts > 0 do
+while (not started) && remaining_attempts > 0 do
   statistics = {}
   failed = false
   remaining_attempts = remaining_attempts - 1
