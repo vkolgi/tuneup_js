@@ -292,6 +292,7 @@ while not started && remaining_attempts > 0 do
     end
 
   rescue Errno::EIO
+  rescue Errno::ECHILD
   rescue EOFError
   rescue PTY::ChildExited
     STDERR.puts "Instruments exited unexpectedly"
