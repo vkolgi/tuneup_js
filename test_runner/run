@@ -298,7 +298,7 @@ while (not started) && remaining_attempts > 0 do
   rescue EOFError
   rescue PTY::ChildExited
     STDERR.puts "Instruments exited unexpectedly"
-    exit 1
+    exit 1 if started
   ensure
     outputs.map(&:close)
 
