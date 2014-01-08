@@ -193,7 +193,7 @@ XCODE_ROOT = `/usr/bin/xcode-select -print-path`.chomp.sub(/^\s+/, "")
 
 TEMPLATE = `[ -f /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate ] && echo "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate" || echo "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"`.chomp.sub(/^\s+/, "")
 
-command = ["/usr/bin/instruments"]
+command = ["env", "DEVELOPER_DIR=#{XCODE_ROOT}", "/usr/bin/instruments"]
 command << "-w" << options.device if options.device
 command << "-t" << "#{TEMPLATE}"
 command << app_bundle
