@@ -245,7 +245,20 @@ extend(UIAElement.prototype, {
         return lookup_function(this);
     },
 
-  
+
+    /**
+     * Wait until the element has the given name
+     */
+    waitUntilHasName: function (name, timeoutInSeconds) {
+
+        this.waitUntil(function(element) { 
+                return element; 
+            }, function(element) {
+                return element.name() == name;
+            }, timeoutInSeconds, "to have the name '" + name + "'");
+       
+    },
+
 
     /**
      * Wait until element fulfills condition
