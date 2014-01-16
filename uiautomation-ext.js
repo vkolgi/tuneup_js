@@ -220,6 +220,7 @@ extend(UIAElement.prototype, {
 
     /**
      * Wait until lookup_function(this) returns a valid lookup
+     *  For convenience, return the element that was found
      */
     waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
         var isNotUseless = function (elem) {
