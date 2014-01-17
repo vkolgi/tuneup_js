@@ -203,7 +203,7 @@ extend(UIAElement.prototype, {
             return element.elements().firstWithName(name);
         }, function(element) {
             return element.isValid();
-        }, timeoutInSeconds, "to become valid");
+        }, timeoutInSeconds, ["to become valid (with name '", name, "')"].join(""));
     },
 
     /**
@@ -214,8 +214,51 @@ extend(UIAElement.prototype, {
             return element.elements().firstWithName(name);
         }, function(element) {
             return !element.isValid();
-        }, timeoutInSeconds, "to become invalid");
+        }, timeoutInSeconds, ["to become invalid (with name '", name, "'')"].join(""));
     },
+
+
+    /**
+     * Wait until lookup_function(this) returns a valid lookup
+     *  For convenience, return the element that was found
+     */
+    waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
+        var isNotUseless = function (elem) {
+            var ret = undefined !== elem
+            && null != elem
+            && elem.toString() != "[object UIAElementNil]";
+            return ret;
+        };
+        
+        if (!isNotUseless(this)) {
+            throw "waitUntilAccessorSuccess: won't work because the top element isn't valid";
+        }        
+
+        this.waitUntil(function(element) {
+            try {
+                return lookup_function(element);
+            } catch (e) {
+                return null;
+            }
+        }, isNotUseless,
+        timeoutInSeconds, "to become an acceptable return value from the given function");
+        return lookup_function(this);
+    },
+
+
+    /**
+     * Wait until the element has the given name
+     */
+    waitUntilHasName: function (name, timeoutInSeconds) {
+
+        this.waitUntil(function(element) { 
+                return element; 
+            }, function(element) {
+                return element.name() == name;
+            }, timeoutInSeconds, "to have the name '" + name + "'");
+       
+    },
+
 
     /**
      * Wait until element fulfills condition
@@ -229,7 +272,15 @@ extend(UIAElement.prototype, {
           retry(function() {
               var filteredElement = filterFunction(element);
               if(!conditionFunction(filteredElement)) {
-                  throw(["Element", filteredElement, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 if (filteredElement == null ||  filteredElement.toString() == "[object UIAElementNil]") {
+                    throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 } else { 
+                    var elementDescription = filteredElement.toString();
+                    if (filteredElement.name !== undefined && filteredElement.name != null && filteredElement.name != "") {
+                      elementDescription += " with name '" + filteredElement.name + "'";
+                    } 
+                    throw(["Element", elementDescription, "failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
+                 }
               }
           }, Math.max(1, timeoutInSeconds/delay), delay);
         } catch (e) {

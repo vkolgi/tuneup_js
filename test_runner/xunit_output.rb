@@ -71,11 +71,13 @@ class XunitOutput
     when :start
       @suite.test_cases << TestCase.new(msg)
     when :pass
-      @suite.test_cases.last.pass!
+      @suite.test_cases.last.pass! if @suite.test_cases.last != nil
     when :fail
-      @suite.test_cases.last.fail!
+      @suite.test_cases.last.fail! if @suite.test_cases.last != nil
     else
-      @suite.test_cases.last << "#{status.to_s.capitalize}: #{msg}"
+      if @suite.test_cases.last != nil && @suite.test_cases.last.time == 0
+        @suite.test_cases.last << "#{status.to_s.capitalize}: #{msg}"
+      end
     end
   end
   
