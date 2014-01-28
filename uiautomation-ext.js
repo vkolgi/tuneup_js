@@ -277,7 +277,7 @@ extend(UIAElement.prototype, {
           retry(function() {
               var filteredElement = filterFunction(element);
               if(!conditionFunction(filteredElement)) {
-                 if (filteredElement == null ||  filteredElement.toString() == "[object UIAElementNil]") {
+                if (!filteredElement.isNotNil()) {
                     throw(["Element failed", description, "within", timeoutInSeconds, "seconds."].join(" "));
                  } else { 
                     var elementDescription = filteredElement.toString();
@@ -442,11 +442,11 @@ extend(UIAKeyboard.prototype,{
   keyboardType : function() {
   if (this.keys().length < 12){
     return this.KEYBOARD_TYPE_NUMBER;
-  } else if (this.keys().firstWithName("a").toString() != "[object UIAElementNil]") {
+  } else if (this.keys().firstWithName("a").isNotNil()) {
     return this.KEYBOARD_TYPE_ALPHA;
-  } else if (this.keys().firstWithName("A").toString() != "[object UIAElementNil]") {
+  } else if (this.keys().firstWithName("A").isNotNil()) {
     return this.KEYBOARD_TYPE_ALPHA_CAPS;
-  } else if (this.keys().firstWithName("1").toString() != "[object UIAElementNil]") {
+  } else if (this.keys().firstWithName("1").isNotNil()) {
     return this.KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION;
   } else {
     return this.KEYBOARD_TYPE_UNKNOWN;
