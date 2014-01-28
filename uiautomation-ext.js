@@ -454,74 +454,64 @@ extend(UIAKeyboard.prototype,{
   }
 });
 
-/*
-TODO: Character keyboard is super slow.
-*/
+
 var typeString = function(pstrString, pbClear) {
-  pstrString += ''; // convert number to string
-  if (!this.hasKeyboardFocus()){
+  pstrString = pstrString.toString();
+  // handle keyboard not being focused
+  if (!this.hasKeyboardFocus()) {
     this.tap();
   }
+  var kb, db;     // keyboard, deleteButton
+  var seconds     = 2;
+  var waitTime    = 0.25;
+  var maxAttempts = seconds / waitTime;
+  var noSuccess   = true;
+  var failMsg     = null;
 
-  UIATarget.localTarget().delay(0.5);
+  // attempt to get a successful keypress several times -- using the first character
+  // this is a hack for iOS 6.x where the keyboard is sometimes "visible" before usable
+  while (noSuccess && 0 < maxAttempts--) {
+    try {
+      kb = target.frontMostApp().keyboard();
+      // handle clearing
+      if (pbClear || pstrString.length === 0) {
+        db = kb.buttons()["Delete"];
 
-  if (pbClear || pstrString.length === 0) {
-    this.clear();
-  }
-
-  if (pstrString.length > 0) {
-    var app = UIATarget.localTarget().frontMostApp();
-    var keyboard = app.keyboard();
-    var keys = app.keyboard().keys();
-    var buttons = app.keyboard().buttons();
-    for (i = 0; i < pstrString.length; i++) {
-      var intKeyboardType = keyboard.keyboardType();
-      var bIsAllCaps = (intKeyboardType == keyboard.KEYBOARD_TYPE_ALPHA_CAPS); //Handles autocapitalizationType = UITextAutocapitalizationTypeAllCharacters
-      var intNewKeyboardType = intKeyboardType;
-      var strChar = pstrString.charAt(i);
-      if ((/[a-z]/.test(strChar)) && intKeyboardType == keyboard.KEYBOARD_TYPE_ALPHA_CAPS && !bIsAllCaps) {
-        buttons.firstWithName("shift").tap();
-        intKeyboardType = keyboard.KEYBOARD_TYPE_ALPHA;
-      } else if ((/[A-Z]/.test(strChar)) && intKeyboardType == keyboard.KEYBOARD_TYPE_ALPHA) {
-        buttons.firstWithName("shift").tap();
-        intKeyboardType = keyboard.KEYBOARD_TYPE_ALPHA_CAPS;
-      } else if ((/[A-z]/.test(strChar)) && intKeyboardType == keyboard.KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION) {
-        buttons.firstWithName("more, letters").tap();
-        intKeyboardType = keyboard.KEYBOARD_TYPE_ALPHA;
-      } else if ((/[0-9.]/.test(strChar)) && intKeyboardType != keyboard.KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION && intKeyboardType != keyboard.KEYBOARD_TYPE_NUMBER) {
-        buttons.firstWithName("more, numbers").tap();
-        intKeyboardType = keyboard.KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION;
+        // on some keyboards, empty text field means that the button tap will error
+        //   so check that the button is valid each time we want to press it.
+        // touchAndHold doesn't work without this next line... not sure why :(
+        if (db.isNotNil() && db.isEnabled()) db.tap()
+        if (db.isNotNil() && db.isEnabled()) db.touchAndHold(3.7);
+        pbClear = false; // prevent clear on next iteration
       }
 
-      if ((/[a-z]/.test(strChar)) && intKeyboardType == keyboard.KEYBOARD_TYPE_ALPHA_CAPS) {
-        strChar = strChar.toUpperCase();
+      if (pstrString.length !== 0) {
+        kb.typeString(pstrString.charAt(0));
       }
-      if (strChar == " ") {
-        keys["space"].tap();
-      } else if (/[0-9]/.test(strChar)) { // Need to change strChar to the index key of the number because strChar = "0" will tap "1" and strChar = "1" will tap "2"
-        if (strChar == "0") {
-          if (intKeyboardType == keyboard.KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION) {
-            strChar = "9";
-          } else {
-            strChar = "10";
-          }
-        } else {
-          strChar = (parseInt(strChar, 10) - 1).toString();
-        }
-        keys[strChar].tap();
-      } else {
-        keys[strChar].tap(); // TODO: this line is super slow when there are many keys
-      }
-      UIATarget.localTarget().delay(0.5);
+      
+      noSuccess = false; // here + no error caught means done
+    } catch (e) {
+      failMsg = e;
+      UIATarget.localTarget().delay(waitTime);
     }
   }
+  
+  // report any errors that prevented success
+  if (0 > maxAttempts && null !== failMsg) throw "typeString caught error: " + failMsg.toString();
+
+  // now type the rest of the string
+  kb.typeString(pstrString.substr(1));
+
 };
 
 extend(UIATextField.prototype,{
-  typeString: typeString
+  typeString: typeString,
+  clear: function() { this.typeString("", true); }
 });
+
 extend(UIATextView.prototype,{
-	typeString: typeString
+  typeString: typeString,
+  clear: function() { this.typeString("", true); }
 });
 
 extend(UIAPickerWheel.prototype, {
