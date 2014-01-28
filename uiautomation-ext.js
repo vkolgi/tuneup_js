@@ -9,7 +9,7 @@ extend(UIATableView.prototype, {
     cellNamed: function(name) {
       return this.cells().firstWithName(name);
     },
-
+      
       /**
        * Asserts that this table has a cell with the name (accessibility label)
        * matching the given +name+ argument.
@@ -19,16 +19,23 @@ extend(UIATableView.prototype, {
     }
   });
 
+var isNotNil = function() {
+  var ret = undefined !== this
+  && null != this
+  && this.toString() != "[object UIAElementNil]";
+  return ret;
+};
+
+
 extend(UIAElement.prototype, {
     /**
      * Dump tree in json format for copy/paste use in AssertWindow and friends
      */
-
     elementJSONDump: function (recursive, attributes, visibleOnly) {
       if (visibleOnly && !this.isVisible()) {
         return "";
       }
-
+      
       if (!attributes) {
         attributes = ["name", "label", "value", "isVisible"];
       } else if (attributes == 'ALL') {
@@ -159,13 +166,6 @@ extend(UIAElement.prototype, {
       UIALogger.logDebug("logVisibleElementTreeJSON: "
                          + (attributes ? "[" + attributes + "]" : '')
                          + "\n" + this.elementJSONDump(true, attributes, true));
-    },
-
-      isNotNil: function() {
-      var ret = undefined !== this
-        && null != this
-        && this.toString() != "[object UIAElementNil]";
-      return ret;
     },
 
       
@@ -303,7 +303,15 @@ extend(UIAElement.prototype, {
       tapAndWaitForInvalid: function() {
       this.tap();
       this.waitForInvalid();
-    }
+    },
+      
+      isNotNil: isNotNil,
+  });
+
+extend(UIAElementNil.prototype, {
+    isNotNil: isNotNil,
+      isValid: function() { return false; },
+      isVisible: function() { return false; }
   });
 
 extend(UIAApplication.prototype, {
@@ -446,7 +454,6 @@ extend(UIAKeyboard.prototype,{
       }
     }
   });
-
 
 var typeString = function(pstrString, pbClear) {
   pstrString = pstrString.toString();
