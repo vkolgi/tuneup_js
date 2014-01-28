@@ -173,6 +173,14 @@ extend(UIAElement.prototype, {
                 + "\n" + this.elementJSONDump(true, attributes, true));
     },
 
+    isNotNil: function() {
+       var ret = undefined !== this
+            && null != this
+            && this.toString() != "[object UIAElementNil]";
+       return ret;
+    },
+
+
 	/**
 	 * Poll till the item becomes visible, up to a specified timeout
 	 */
@@ -223,13 +231,10 @@ extend(UIAElement.prototype, {
      *  For convenience, return the element that was found
      */
     waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
-        var isNotUseless = function (elem) {
-            var ret = undefined !== elem
-            && null != elem
-            && elem.toString() != "[object UIAElementNil]";
-            return ret;
-        };
-        
+         var isNotUseless = function(elem) {
+             return elem.isNotNil();
+         }
+
         if (!isNotUseless(this)) {
             throw "waitUntilAccessorSuccess: won't work because the top element isn't valid";
         }        
