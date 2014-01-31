@@ -280,8 +280,19 @@ extend(UIAElement.prototype, {
   /**
    * A shortcut for waiting an element to become visible and tap.
    */
-  vtap: function () {
-    this.waitUntilVisible(10);
+  vtap: function (timeout) {
+    if (undefined === timeout) timeout = 10;
+    this.waitUntilVisible(timeout);
+    this.tap();
+  },
+
+  /**
+   * A shortcut for scrolling to a visible item and and tap.
+   */
+  svtap: function (timeout) {
+    if (undefined === timeout) timeout = 1;
+    this.scrollToVisible();
+    //this.waitUntilVisible(timeout);
     this.tap();
   },
   /**
