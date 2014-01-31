@@ -465,19 +465,19 @@ var typeString = function (pstrString, pbClear) {
 
   // attempt to get a successful keypress several times -- using the first character
   // this is a hack for iOS 6.x where the keyboard is sometimes "visible" before usable
-  while (noSuccess && 0 < maxAttempts--) {
+  while ((pbClear || noSuccess) && 0 < maxAttempts--) {
     try {
       kb = target.frontMostApp().keyboard();
       // handle clearing
-      if (pbClear || pstrString.length === 0) {
+      if (pbClear) {
         db = kb.buttons()["Delete"];
+        if (!db.isNotNil()) db = kb.keys()["Delete"]; // compatibilty hack
 
-        // on some keyboards, empty text field means that the button tap will error
-        //   so check that the button is valid each time we want to press it.
         // touchAndHold doesn't work without this next line... not sure why :(
-        if (db.isNotNil() && db.isEnabled()) db.tap()
-        if (db.isNotNil() && db.isEnabled()) db.touchAndHold(3.7);
+        db.tap();
         pbClear = false; // prevent clear on next iteration
+        db.touchAndHold(3.7);
+
       }
 
       if (pstrString.length !== 0) {
@@ -496,7 +496,7 @@ var typeString = function (pstrString, pbClear) {
   if (0 > maxAttempts && null !== failMsg) throw "typeString caught error: " + failMsg.toString();
 
   // now type the rest of the string
-  kb.typeString(pstrString.substr(1));
+  if (pstrString.length > 0) kb.typeString(pstrString.substr(1));
 
 };
 
