@@ -19,11 +19,16 @@ extend(UIATableView.prototype, {
   }
 });
 
+var isNotNil = function () {
+  var ret = undefined !== this && null != this && this.toString() != "[object UIAElementNil]";
+  return ret;
+};
+
+
 extend(UIAElement.prototype, {
   /**
    * Dump tree in json format for copy/paste use in AssertWindow and friends
    */
-
   elementJSONDump: function (recursive, attributes, visibleOnly) {
     if (visibleOnly && !this.isVisible()) {
       return "";
@@ -145,11 +150,6 @@ extend(UIAElement.prototype, {
 
   logVisibleElementTreeJSON: function (attributes) {
     UIALogger.logDebug("logVisibleElementTreeJSON: " + (attributes ? "[" + attributes + "]" : '') + "\n" + this.elementJSONDump(true, attributes, true));
-  },
-
-  isNotNil: function () {
-    var ret = undefined !== this && null != this && this.toString() != "[object UIAElementNil]";
-    return ret;
   },
 
 
@@ -280,8 +280,19 @@ extend(UIAElement.prototype, {
   /**
    * A shortcut for waiting an element to become visible and tap.
    */
-  vtap: function () {
-    this.waitUntilVisible(10);
+  vtap: function (timeout) {
+    if (undefined === timeout) timeout = 10;
+    this.waitUntilVisible(timeout);
+    this.tap();
+  },
+
+  /**
+   * A shortcut for scrolling to a visible item and and tap.
+   */
+  svtap: function (timeout) {
+    if (undefined === timeout) timeout = 1;
+    this.scrollToVisible();
+    //this.waitUntilVisible(timeout);
     this.tap();
   },
   /**
@@ -290,6 +301,18 @@ extend(UIAElement.prototype, {
   tapAndWaitForInvalid: function () {
     this.tap();
     this.waitForInvalid();
+  },
+
+  isNotNil: isNotNil,
+});
+
+extend(UIAElementNil.prototype, {
+  isNotNil: isNotNil,
+  isValid: function () {
+    return false;
+  },
+  isVisible: function () {
+    return false;
   }
 });
 
@@ -438,7 +461,6 @@ extend(UIAKeyboard.prototype, {
   }
 });
 
-
 var typeString = function (pstrString, pbClear) {
   pstrString = pstrString.toString();
   // handle keyboard not being focused
@@ -454,19 +476,19 @@ var typeString = function (pstrString, pbClear) {
 
   // attempt to get a successful keypress several times -- using the first character
   // this is a hack for iOS 6.x where the keyboard is sometimes "visible" before usable
-  while (noSuccess && 0 < maxAttempts--) {
+  while ((pbClear || noSuccess) && 0 < maxAttempts--) {
     try {
       kb = target.frontMostApp().keyboard();
       // handle clearing
-      if (pbClear || pstrString.length === 0) {
+      if (pbClear) {
         db = kb.buttons()["Delete"];
+        if (!db.isNotNil()) db = kb.keys()["Delete"]; // compatibilty hack
 
-        // on some keyboards, empty text field means that the button tap will error
-        //   so check that the button is valid each time we want to press it.
         // touchAndHold doesn't work without this next line... not sure why :(
-        if (db.isNotNil() && db.isEnabled()) db.tap()
-        if (db.isNotNil() && db.isEnabled()) db.touchAndHold(3.7);
+        db.tap();
         pbClear = false; // prevent clear on next iteration
+        db.touchAndHold(3.7);
+
       }
 
       if (pstrString.length !== 0) {
@@ -485,7 +507,7 @@ var typeString = function (pstrString, pbClear) {
   if (0 > maxAttempts && null !== failMsg) throw "typeString caught error: " + failMsg.toString();
 
   // now type the rest of the string
-  kb.typeString(pstrString.substr(1));
+  if (pstrString.length > 0) kb.typeString(pstrString.substr(1));
 
 };
 
