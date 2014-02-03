@@ -251,14 +251,19 @@ extend(UIAElement.prototype, {
         var filteredElement = filterFunction(element);
         if (!conditionFunction(filteredElement)) {
           if (!filteredElement.isNotNil()) {
+            // make simple error message if the element doesn't exist
             throw (["Element failed", description,
               "within", timeoutInSeconds, "seconds."
             ].join(" "));
           }
           else {
+            // build a detailed error message with all available info on the current element
             var elementDescription = filteredElement.toString();
-            if (filteredElement.name !== undefined && filteredElement.name != null && filteredElement.name != "") {
-              elementDescription += " with name '" + filteredElement.name + "'";
+            if (filteredElement.name !== undefined) {
+              var elemName = filteredElement.name();
+              if (elemName !== null && elemName != "") {
+                elementDescription += " with name '" + elemName + "'";
+              }
             }
             throw (["Element", elementDescription,
               "failed", description,
