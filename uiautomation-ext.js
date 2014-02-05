@@ -296,7 +296,14 @@ extend(UIAElement.prototype, {
    */
   svtap: function (timeout) {
     if (undefined === timeout) timeout = 1;
-    this.scrollToVisible();
+    try {
+      this.scrollToVisible();
+    } catch (e) {
+      // iOS 6 hack when no scrolling is needed
+      if (e.toString() != "scrollToVisible cannot be used on the element because it does not have a scrollable ancestor.") {
+        throw e;
+      }
+    }
     //this.waitUntilVisible(timeout);
     this.tap();
   },
