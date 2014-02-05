@@ -312,7 +312,9 @@ extend(UIAElement.prototype, {
 });
 
 extend(UIAElementNil.prototype, {
-  isNotNil: isNotNil,
+  isNotNil: function () {
+    return false;
+  },
   isValid: function () {
     return false;
   },
