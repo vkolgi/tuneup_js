@@ -204,7 +204,7 @@ extend(UIAElement.prototype, {
    */
   waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
     var isNotUseless = function (elem) {
-      return elem.isNotNil();
+      return elem !== null && elem.isNotNil();
     }
 
     if (!isNotUseless(this)) {
@@ -250,7 +250,7 @@ extend(UIAElement.prototype, {
       retry(function () {
         var filteredElement = filterFunction(element);
         if (!conditionFunction(filteredElement)) {
-          if (!filteredElement.isNotNil()) {
+          if (!(filteredElement !== null && filteredElement.isNotNil())) {
             // make simple error message if the element doesn't exist
             throw (["Element failed", description,
               "within", timeoutInSeconds, "seconds."
