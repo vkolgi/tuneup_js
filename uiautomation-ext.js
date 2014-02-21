@@ -201,10 +201,17 @@ extend(UIAElement.prototype, {
   /**
    * Wait until lookup_function(this) returns a valid lookup
    *  For convenience, return the element that was found
+   *  Allow a label for more helpful error messages
    */
-  waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds) {
+  waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds, label) {
     var isNotUseless = function (elem) {
       return elem !== null && elem.isNotNil();
+    }
+
+    // this function will be referenced in waitUntil -- it supplies 
+    //   the name of what we are waiting for
+    var label_fn = function () {
+      return label;
     }
 
     if (!isNotUseless(this)) {
@@ -212,11 +219,16 @@ extend(UIAElement.prototype, {
     }
 
     this.waitUntil(function (element) {
+        // annotate the found elements with the label function if they are nil
         try {
-          return lookup_function(element);
+          var possibleMatch = lookup_function(element);
+          if (!possibleMatch.isNotNil() && label !== undefined) possibleMatch.label = label_fn;
+          return possibleMatch;
         }
         catch (e) {
-          return null;
+          var fakeNil = new UIAElementNil();
+          if (label !== undefined) fakeNil.label = label_fn;
+          return fakeNil;
         }
       }, isNotUseless,
       timeoutInSeconds, "to become an acceptable return value from the given function");
@@ -251,8 +263,9 @@ extend(UIAElement.prototype, {
         var filteredElement = filterFunction(element);
         if (!conditionFunction(filteredElement)) {
           if (!(filteredElement !== null && filteredElement.isNotNil())) {
+            var label = (filteredElement && filteredElement.label) ? filteredElement.label() : "Element";
             // make simple error message if the element doesn't exist
-            throw (["Element failed", description,
+            throw ([label, "failed", description,
               "within", timeoutInSeconds, "seconds."
             ].join(" "));
           }
