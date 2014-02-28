@@ -8,6 +8,7 @@ require "tempfile"
 require File.expand_path(File.join(File.dirname(__FILE__), "preprocessor"))
 require File.expand_path(File.join(File.dirname(__FILE__), "console_output"))
 require File.expand_path(File.join(File.dirname(__FILE__), "colored_console_output"))
+require File.expand_path(File.join(File.dirname(__FILE__), "abbreviated_console_output"))
 require File.expand_path(File.join(File.dirname(__FILE__), "xunit_output"))
 
 options = OpenStruct.new
@@ -53,6 +54,10 @@ opts_parser = OptionParser.new do |opts|
 
   opts.on("-c", "--color", "Colorize the console output") do
     options.colorize = true
+  end
+  
+  opts.on("-b", "--brief", "Abbreviated and colorized console output") do
+    options.brief = true
   end
 
   opts.on("-p", "--preprocess", "Use own preprocessor to substitude imports") do
@@ -102,7 +107,7 @@ raise "Output directory #{test_output} does not exist" unless File.directory?(te
 # Output options
 outputs = []
 unless options.quiet    # HINT this could be moved into the actual options parsing
-  outputs << (options.colorize ? ColoredConsoleOutput.new : ConsoleOutput.new)
+  outputs << (options.colorize ? ColoredConsoleOutput.new : (options.brief ? AbbreviatedConsoleOutput.new : ConsoleOutput.new))
 end
 if options.xunit
   report_filename = File.join(test_output, File.basename(test_script, File.extname(test_script)) + ".xml")
