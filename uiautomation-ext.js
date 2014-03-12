@@ -208,7 +208,7 @@ extend(UIAElement.prototype, {
       return elem !== null && elem.isNotNil();
     }
 
-    // this function will be referenced in waitUntil -- it supplies 
+    // this function will be referenced in waitUntil -- it supplies
     //   the name of what we are waiting for
     var label_fn = function () {
       return label;
@@ -541,7 +541,16 @@ var typeString = function (pstrString, pbClear) {
   if (0 > maxAttempts && null !== failMsg) throw "typeString caught error: " + failMsg.toString();
 
   // now type the rest of the string
-  if (pstrString.length > 0) kb.typeString(pstrString.substr(1));
+  try {
+      if (pstrString.length > 0) kb.typeString(pstrString.substr(1));
+  } catch (e) {
+      if (-1 == e.toString().indexOf(" failed to tap ")) throw e;
+
+      UIALogger.logDebug("Retrying keyboard action, typing slower this time");
+      this.typeString("", true);
+      kb.setInterKeyDelay(0.2);
+      kb.typeString(pstrString);
+  }
 
 };
 
