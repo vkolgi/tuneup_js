@@ -47,6 +47,7 @@ function test(title, f, options) {
   }
   catch (e) {
     UIALogger.logError(e.toString());
+    UIALogger.logError(e.stack);
     if (options.logTree) target.logElementTree();
     if (options.logTreeJSON) application.mainWindow().logElementTreeJSON();
     if (options.screenCapture) target.captureScreenWithName(title + '-fail');
