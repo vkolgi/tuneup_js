@@ -32,11 +32,7 @@ function test(title, f, options) {
   }
 
   if (!options) {
-    options = {
-      logTree: true,
-      logTreeJSON: false,
-      screenCapture: true
-    };
+    options = testCreateDefaultOptions();
   }
   target = UIATarget.localTarget();
   application = target.frontMostApp();
@@ -47,10 +43,25 @@ function test(title, f, options) {
   }
   catch (e) {
     UIALogger.logError(e.toString());
-    UIALogger.logError(e.stack);
+    if (options.logStackTrace) UIALogger.logError(e.stack);
     if (options.logTree) target.logElementTree();
     if (options.logTreeJSON) application.mainWindow().logElementTreeJSON();
     if (options.screenCapture) target.captureScreenWithName(title + '-fail');
     UIALogger.logFail(title);
   }
 }
+
+/**
+ * Helper function to isolate clients from additional option changes. Clients can use this function to get a new option object and then only change the options they care about, confident that any new options added since their
+ * code was created will contain the new default values.
+ * @returns {Object} containing the error options
+ */
+function testCreateDefaultOptions() {
+	return {
+	  logStackTrace: false,
+      logTree: true,
+      logTreeJSON: false,
+      screenCapture: true
+    };
+}
+
