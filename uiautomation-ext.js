@@ -415,6 +415,13 @@ extend(UIATarget.prototype, {
   },
 
   /**
+   * Determine if we are running on a simulator.
+   */
+  isSimulator: function() {
+    return this.model().match(/Simulator/) !== null;
+  },
+
+  /**
    * A convenience method for detecting that you're running on an iPad
    */
   isDeviceiPad: function () {
