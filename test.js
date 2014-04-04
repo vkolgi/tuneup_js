@@ -57,11 +57,11 @@ function test(title, f, options) {
  * @returns {Object} containing the error options
  */
 function testCreateDefaultOptions() {
-	return {
-	  logStackTrace: false,
-      logTree: true,
-      logTreeJSON: false,
-      screenCapture: true
-    };
+  return {
+    logStackTrace: false,
+    logTree: true,
+    logTreeJSON: false,
+    screenCapture: true
+  };
 }
 
