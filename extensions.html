@@ -1,0 +1,370 @@
+---
+layout: page
+title: JavaScript Extensions
+description: Useful JavaScript utilties and extensions
+permalink: extensions.html
+---
+<p>
+  TuneupJS comes with several handy functions and extensions to existing
+  JavaScript objects. These break down into a handful of extensions on
+  core classes and extensions of the UIAutomation framework itself.
+</p>
+
+<h2>UIAutomation Extensions</h2>
+<p>
+  These extensions can be found in the <code>uiautomation-ext.js</code> file.
+</p>
+
+<h3>UIATableView.prototype.cellNamed(name)</h3>
+<p>
+  Returns the first table cell matching the given <code>name</code> parameter.
+  This is a shortcut for:
+{% highlight javascript %}
+this.cells().firstWithName(name);
+{% endhighlight %}
+</p>
+
+<h3>UIATableView.prototype.assertCellNamed(name)</h3>
+<p>
+  Performs an <a href="/assertions.html">assertion</a> that the target table
+  view has a cell with the given name.
+</p>
+
+<h3>UIAElement.prototype.elementJSONDump(recursive, attributes, visibleOnly)</h3>
+<p>
+  Dumps a <code>String</code> representation for the target in JSON
+  format which can be used for making
+  <a href="/assertions.html#screen-assertions">screen assertions</a>.
+</p>
+<p>
+  If the <code>recursive</code> parameter is set to <code>true</code>, this function
+  will recurse through the window hierarchy calling the same function on sub-views.
+</p>
+<p>
+  The <code>attributes</code> parameter is an array of strings indicating which
+  attributes of each <code>UIAElement</code> you wish to log. If not specified,
+  the default values are <code>["name", "label", "value", "isVisible"]</code>.
+</p>
+<p>
+  If the <code>visibleOnly</code> parameter is set to <code>true</code>, this method
+  will ignore any views that are hidden. The default value is <code>false</code>.
+</p>
+
+<h3>UIAElement.prototype.logElementJSON(attributes)</h3>
+<p>
+  Executes <code>elementJSONDump</code> without recursion on the target and logs the results
+  via the <code>UIALogger</code> object. Note that the <code>attributes</code>
+  given to this method are passed straight-through to <code>elementJSONDump</code>.
+</p>
+
+<h3>UIAElement.prototype.logVisibleElementJSON(attributes)</h3>
+<p>
+  Executes <code>elementJSONDump</code> without recursion, passing the given
+  <code>attributes</code> straight-through and ignoring any hidden elements.
+</p>
+
+<h3>UIAElement.prototype.logElementTreeJSON(attributes)</h3>
+<p>
+  Executes <code>elementJSONDump</code> with recursion enabled and passing
+  the <code>attributes</code> argument straight-through.
+</p>
+
+<h3>UIAElement.prototype.logVisibleElementTreeJSON(attributes)</h3>
+<p>
+  Executes <code>elementJSONDump</code> with recursion enabled, passing
+  <code>attributes</code> straight-through and ignoring hidden elements.
+</p>
+
+<h3>UIAElement.prototype.waitUntilVisible(timeout)</h3>
+<p>
+  Blocks execution of the test until the target <code>UIAElement</code> is
+  visible or until <code>timeout</code> (in seconds) has occurred.
+</p>
+<p>
+  UIAutomation will allow you to get references to <code>UIAElements</code>
+  that may not yet be visible on the screen. Use this method to pause your
+  test until the UI has settled down so that you can safely make assertions
+  against it.
+</p>
+
+<h3>UIAElement.prototype.waitUntilInvisible(timeout)</h3>
+<p>
+  The inverse of <code>waitUntilVisible</code>.
+</p>
+
+<h3>UIAElement.prototype.waitUntilFoundByName(name, timeout)</h3>
+<p>
+  Waits for a child-element with the given <code>name</code> to appear before
+  the <code>timeout</code> (in seconds) passes.
+</p>
+
+<h3>UIAElement.prototype.waitUntilNotFoundByName(name, timeout)</h3>
+<p>
+  Wait until the child element named by <code>name</code> is not found
+  before <code>timeout</code> (in seconds) passes.
+</p>
+
+<h3>UIAElement.prototype.waitUntilAccessorSuccess(f, timeout, label)</h3>
+<p>
+  Wait until the function <code>f</code> returns a valid object. For convenience,
+  return the element that was found. The optional <code>label</code> argument
+  can be given for more useful error messages if the method fails.
+</p>
+
+<h3>UIAElement.prototype.waitUntil(filter, condition, timeout, description)</h3>
+<p>
+  Waits until the element fulfills a condition up to a <code>timeout</code>
+  (in seconds).
+</p>
+<p>
+  The <code>filter</code> argument is a function applied to each sub-element
+  for any transformation required to be applied before filtering. For a simple
+  pass-through, provide a function like this:
+{% highlight javascript %}
+function(e) { return e; };
+{% endhighlight %}
+</p>
+<p>
+  The <code>condition</code> argument is a function applied to each filtered
+  element. This function will be executed for the filtered elements and if
+  it is unable to return <code>true</code> before timeout, the function
+  will throw an exception.
+</p>
+<p>
+  The <code>timeout</code> specifies the wait period before failing the
+  execution of this method (in seconds).
+</p>
+<p>
+  The <code>description</code> parameter is used as a part of the error
+  message in the exception thrown if the function fails.
+</p>
+
+<h3>UIAElement.prototype.waitUntilHasName(name, timeout)</h3>
+<p>
+  Wait for the element to have the given <code>name</code> before
+  the given <code>timeout</code>.
+</p>
+
+<h3>UIAElement.prototype.vtap(timeout)</h3>
+<p>
+  Wait for the given element to be visible (before <code>timeout</code>) and
+  then tap it.
+</p>
+
+<h3>UIAElement.prototype.svtap(timeout)</h3>
+<p>
+  Wait for the given element to be visible (before <code>timeout</code>) and
+  scroll it to be visible, then tap it.
+</p>
+
+<h3>UIAElement.prototype.tapAndWaitForInvalid(timeout)</h3>
+<p>
+  Tap the element and wait for it to be invalid (typically due to a new view-controller
+  appearing on-screen) before the given <code>timeout</code>.
+</p>
+
+<h3>UIAElementNil.prototype.isNotNil()</h3>
+<p>
+  Always returns <code>true</code>. This function is handy when iterating through
+  child-elements, some of which may be instances of <code>UIAElementNil</code>,
+  which does not have this method.
+</p>
+
+<h3>UIAElementNil.prototype.isValid()</h3>
+<p>
+  Always returns <code>false</code>. This function is handy when iterating through
+  child-elements, some of which may be instances of <code>UIAElementNil</code>,
+  which does not have this method.
+</p>
+
+<h3>UIAElementNil.prototype.isVisible()</h3>
+<p>
+  Always returns <code>false</code>. This function is handy when iterating through
+  child-elements, some of which may be instances of <code>UIAElementNil</code>,
+  which does not have this method.
+</p>
+
+<h3>UIAApplication.prototype.navigationTitle()</h3>
+<p>
+  A shortcut for getting the current view controller's title from the
+  navigation bar. If there is no navigation bar, this method returns <code>null</code>.
+</p>
+
+<h3>UIAApplication.prototype.isPortraitOrientation()</h3>
+<p>
+  A shortcut for checking that the interface orientation in either
+  portrait mode.
+</p>
+
+<h3>UIAApplication.prototype.isLandscapeOrientation()</h3>
+<p>
+  A shortcut for checking that the interface orientation in one of the
+  landscape orientations.
+</p>
+
+<h3>UIANavigationBar.prototype.assertLeftButtonNamed(name)</h3>
+<p>
+  Asserts that the left button's name matches the given <code>name</code> argument.
+</p>
+
+<h3>UIANavigationBar.prototype.assertRightButtonNamed(name)</h3>
+<p>
+  Asserts that the right button's name matches the given <code>name</code> argument
+</p>
+
+<h3>UIATarget.prototype.isPortraitOrientation()</h3>
+<p>
+  A shortcut for checking that the interface orientation in either portrait mode.
+</p>
+
+<h3>UIATarget.prototype.isLandscapeOrientation()</h3>
+<p>
+  A shortcut for checking that the interface orientation in one of the
+  landscape orientations.
+</p>
+
+<h3>UIATarget.prototype.isSimulator()</h3>
+<p>
+  Determine if we are running on a simulator.
+</p>
+
+<h3>UIATarget.prototype.isDeviceiPad()</h3>
+<p>
+  A convenience method for detecting that you're running on an iPad.
+</p>
+
+<h3>UIATarget.prototype.isDeviceiPhone()</h3>
+<p>
+  A convenience method for detecting that you're running on an iPhone or iPod Touch.
+</p>
+
+<h3>UIATarget.prototype.isDeviceiPhone5()</h3>
+<p>
+  A shortcut for checking if target device is iPhone 5 (or iPod Touch
+  5th generation).
+</p>
+
+<h3>UIATarget.prototype.captureAppScreenWithName(imageName)</h3>
+<p>
+  A convenience method for producing screenshots without status bar. You can
+  use this method to capture screenshots for making
+  <a href="/assertions.html#screen-assertions">screen assertions</a>.
+</p>
+
+<h3>UIATarget.prototype.logDeviceInfo()</h3>
+<p>
+  Logs device information via <code>UIALogger</code> which includes the device
+  model, the size of the screen, the device name, the system name and the
+  system version.
+</p>
+
+<h3>UIAKeyboard.prototype.keyboardType()</h3>
+<p>
+  Returns one of the following constants:
+  <ul>
+    <li><code>KEYBOARD_TYPE_UNKNOWN</code></li>
+    <li><code>KEYBOARD_TYPE_ALPHA</code></li>
+    <li><code>KEYBOARD_TYPE_ALPHA_CAPS</code></li>
+    <li><code>KEYBOARD_TYPE_NUMBER_AND_PUNCTUATION</code></li>
+    <li><code>KEYBOARD_TYPE_NUMBER</code></li>
+  </ul>
+</p>
+
+<h3>UIAKeyboard.prototype.typeString(string)</h3>
+<p>
+  Directly enters the given string one character at a time.
+</p>
+
+<h3>UIATextField.prototype.typeString(string)</h3>
+<p>
+  Same as the method above, but attached directly to a text field.
+</p>
+
+<h3>UIATextField.prototype.clear()</h3>
+<p>
+  Clears the text field using the <code>typeString()</code> function.
+</p>
+
+<h3>UIATextView.prototype.typeString(string)</h3>
+<p>
+  Types a string into the text view via the <code>typeString()</code>
+  method described above.
+</p>
+
+<h3>UIATextView.prototype.clear()</h3>
+<p>
+  Clears the contents of the text view using <code>typeString()</code>.
+</p>
+
+<h2>JavaScript Extensions</h2>
+<p>
+  These can be found in the <code>lang-ext.js</code> file.
+</p>
+
+<h3>extend(destination, source)</h3>
+<p>
+  Copies the properties from <code>destination</code> to <code>source</code>. This
+  is the main function used to extend other JavaScript objects. Be careful with this
+  one!
+</p>
+
+<h3>Object.prototype.dumpProperties()</h3>
+<p>
+  A debugging method that dumps the object's properties to a returned <code>String</code>.
+</p>
+
+<h3>Object.prototype.getMethods()</h3>
+<p>
+  Returns all of the methods for the target as an array of functions.
+</p>
+
+<h3>Array.prototype.contains(f)</h3>
+<p>
+  Applies the given function <code>f</code> to each element in the array.
+  The first element for which <code>f</code> returns <code>true</code>
+  will be the object returned from this method.
+</p>
+<p>
+  For example:
+{% highlight javascript %}
+var stuff = ["alpha", "bravo", "charlie"];
+var foundCharlie = stuff.contains(function(i) { return i === "charlie" });
+// foundCharlie = true
+var foundEd = stuff.contains(function(i) { return i === "edward" });
+// foundEd = false
+{% endhighlight %}
+</p>
+
+<h3>Array.prototype.unique()</h3>
+<p>
+  Returns only the unique elements in the array. For example:
+{% highlight javascript %}
+var stuff = ["alpha", "bravo", "bravo", "charlie"];
+var uniqStuff = stuff.unique();
+// uniqStuff = ["alpha", "bravo", "charlie"]
+{% endhighlight %}
+</p>
+
+<h3>String.prototype.trim()</h3>
+<p>
+  Returns a <code>String</code> from the given target with the same content
+  minus any leading or trailing whitespace characters.
+</p>
+
+<h3>String.prototype.ltrim()</h3>
+<p>
+  Returns a <code>String</code> from the given target with the same content
+  minus any <em>leading</em> whitespace characters.
+</p>
+
+<h3>String.prototype.rtrim()</h3>
+<p>
+  Returns a <code>String</code> from the given target with the same content
+  minus any <em>trailing</em> whitespace characters.
+</p>
+
+<h3>String.prototype.lcfirst()</h3>
+<p>
+  Returns a <code>String</code> from the target with the same content but
+  ensuring that the first letter is lower-cased.
+</p>
