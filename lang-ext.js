@@ -8,35 +8,33 @@ function extend(destination, source) {
   return destination;
 }
 
-extend(Object.prototype, {
 /**
  * Dump the properties out a String returned by the function.
  */
-  dumpProperties: function() {
+function dumpProperties(_this) {
     var dumpStr = "";
-    for (var propName in this) {
-      if (this.hasOwnProperty(propName)) {
-        if (dumpStr !== "") {
-          dumpStr += ", ";
+    for (var propName in _this) {
+        if (_this.hasOwnProperty(propName)) {
+            if (dumpStr !== "") {
+                dumpStr += ", ";
+            }
+            dumpStr += (propName + "=" + _this[propName]);
         }
-        dumpStr += (propName + "=" + this[propName]);
-      }
     }
 
     return dumpStr;
-  },
+};
 
-  getMethods: function() {
+function getMethods(_this) {
     var methods = [];
-    for (var m in this) {
-      //if (typeof this[m] == "function" && this.hasOwnProperty(m)) {
-      if (typeof this[m] == "function") {
-        methods.push(m);
-      }
+    for (var m in _this) {
+        //if (typeof _this[m] == "function" && _this.hasOwnProperty(m)) {
+        if (typeof _this[m] == "function") {
+            methods.push(m);
+        }
     }
     return methods;
-  }
-});
+}
 
 extend(Array.prototype, {
   /**

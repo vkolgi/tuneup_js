@@ -41,7 +41,7 @@ extend(UIAElement.prototype, {
       attributes = ["name",
         "label",
         "value"
-      ].concat(this.getMethods().filter(function (method) {
+      ].concat(getMethods(this).filter(function (method) {
         return method.match(/^(is|has)/)
       }));
     }
