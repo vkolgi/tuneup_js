@@ -7,6 +7,11 @@ permalink: writing.html
 <p>
   One of tuneup’s primary goals is making tests as easy to read as they are easy to write. This is done by grouping actions and assertions together in logical testing units. These tests are idenfitied by a call to the <a href="structure.html#test"><code>test</code></a> JavaScript function. In order for you to use this function, you need to import tuneup into the JavaScript runtime.
 </p>
+<p>
+  UIAutomation does most of the heavy lifting, but tuneup refines the interface for
+  a more pleasant experience. Just keep in mind that, under the covers, it’s all
+  <a href="https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/UsingtheAutomationInstrument/UsingtheAutomationInstrument.html">UIAutomation</a>.
+</p>
 
 <h2>Step 1: Import Tuneup JS</h2>
 <p>
