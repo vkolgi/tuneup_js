@@ -237,6 +237,57 @@ extend(UIAElement.prototype, {
 
 
   /**
+   * Wait until one lookup_function(this) in an associative array of lookup functions
+   *  returns a valid lookup.
+   *
+   *  Return an associative array of {key: <element found>, elem: <the element that was found>}
+   */
+  waitUntilAccessorSelect: function (lookup_functions, timeoutInSeconds) {
+    var isNotUseless = function (elem) {
+      return elem !== null && elem.isNotNil();
+    }
+
+    // this function will be referenced in waitUntil -- it supplies
+    //   the name of what we are waiting for
+    var label = "Functions for [" + Object.keys(lookup_functions).join(", ") + "]";
+    var label_fn = function () {
+      return label;
+    }
+
+    if (!isNotUseless(this)) {
+      throw "waitUntilAccessorSelect: won't work because the top element isn't valid";
+    }
+
+    // composite find function
+    var find_any = function (element) {
+      for (var k in lookup_functions) {
+        var lookup_function = lookup_functions[k];
+        try {
+          var el = lookup_function(element);
+          if (isNotUseless(el)) return {key: k, elem: el};
+        }
+        catch (e) {
+          // ignore
+        }
+      }
+      return new UIAElementNil();
+    };
+
+    this.waitUntil(function (element) {
+        var result = find_any(element);
+        if (undefined !== result) return result["elem"];
+
+        // annotate the found elements with the label function if they are nil
+        var fakeNil = new UIAElementNil();
+        if (label !== undefined) fakeNil.label = label_fn;
+        return fakeNil;
+      }, isNotUseless,
+      timeoutInSeconds, "to produce any acceptable return values");
+    return find_any(this);
+  },
+
+
+  /**
    * Wait until the element has the given name
    */
   waitUntilHasName: function (name, timeoutInSeconds) {
