@@ -1,9 +1,7 @@
 var ImageAsserter = (function() {
 
   function ImageAsserter(tuneUpPath, outputPath, refImagesPath) {
-
     if (!outputPath || !refImagesPath || !tuneUpPath) {
-
       throw new AssertionException("output, refImages, tuneUp pathes can't be null");
     }
 
@@ -13,19 +11,16 @@ var ImageAsserter = (function() {
 
     var target          = UIATarget.localTarget();
     if (!target) {
-
       throw new AssertionException("unable to get localTarget");
     }
 
     this.host           = target.host();
     if (!this.host) {
-
       throw new AssertionException("unable to get current UAIHost");
     }
   }
 
   ImageAsserter.prototype.assertImageNamed = function(imageName, threshold) {
-
     var command,
         taskResult,
         assertSuccessfull = false,
@@ -38,22 +33,22 @@ var ImageAsserter = (function() {
                                                                 args,
                                                                 TIMEOUT);
 
-    assertSuccessfull = (taskResult.exitCode === SUCCESS_EXIT_CODE);
-    if (!assertSuccessfull) UIALogger.logError(taskResult.stderr);
+    assertSuccessful = (taskResult.exitCode === SUCCESS_EXIT_CODE);
+    if (!assertSuccessful) {
+      UIALogger.logError(taskResult.stderr);
+    }
 
-    return assertSuccessfull;
+    return assertSuccessful;
   };
 
   return ImageAsserter;
 }());
 
 function createImageAsserter(tuneUpPath, outputPath, refImagesPath) {
-
   this.imageAsserter = new ImageAsserter(tuneUpPath, outputPath, refImagesPath);
 }
 
 function assertScreenMatchesImageNamed(imageName, message, threshold) {
-
   if (!this.imageAsserter) {
     throw new AssertionException("imageAsserter isn't created.");
   }
