@@ -34,9 +34,9 @@ class ImageAssertion
       if exit_status == 0
         return process_imagemagick_result(image_file_name, result, threshold)
       elsif exit_status == 1
-        print_status(create_status('failed'), "Images differ, check #{diff_images_path} for details")
+        print_status(create_status('failed', "Images differ, check #{diff_images_path} for details"))
       else
-        print_status(create_status('failed'), "ImageMagick compare failed: #{result}")
+        print_status(create_status('failed', "ImageMagick compare failed: #{result}"))
       end
     end
   end
