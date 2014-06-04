@@ -144,11 +144,19 @@ function assertNotNull(thingie, message) {
 }
 
 function OnPassException(message) {
-    this.name = 'OnPassException';
-    this.message = message;
-    this.toString = function() {
-        return this.name + ': "' + this.message + '"';
-    };
+  this.name = 'OnPassException';
+  this.message = message;
+  this.toString = function() {
+      return this.name + ': "' + this.message + '"';
+  };
+}
+
+function PropertyMismatchException(propName, expected, given) {
+  this.name = 'PropertyMismatchException';
+  this.message = propName + ": expected <" + expected + "> given <" + given + ">";
+  this.toString = function() {
+    return this.name + ": " + this.message;
+  }
 }
 
 /**
@@ -170,8 +178,8 @@ function assertElementTree(element, definition) {
   try {
     assertPropertiesMatch(definition, element, 0);
   }
-  catch(badProp) {
-    fail("Failed to match " + badProp[0] + ": " + badProp[1]);
+  catch(e) {
+    fail(e.toString())
   }
 
   if (onPass) {
@@ -299,14 +307,17 @@ function assertPropertiesMatch(expected, given, level) {
         if (UIATarget.localTarget().model().match(/^iPad/) !== null ||
             UIATarget.localTarget().name().match(/^iPad Simulator$/) !== null) {
           continue;  // we're on the wrong platform, ignore
-        } else {
+        }
+        else {
           propName = propName.match(/^(.*)~iphone/)[1];
         }
-      } else if (propName.match(/~ipad$/)) {
+      }
+      else if (propName.match(/~ipad$/)) {
         if (UIATarget.localTarget().model().match(/^iPad/) === null &&
             UIATarget.localTarget().name().match(/^iPad Simulator/) === null) {
           continue;  // we're on the wrong platform, ignore
-        } else {
+        }
+        else {
           propName = propName.match(/^(.*)~ipad/)[1];
         }
       }
@@ -328,69 +339,64 @@ function assertPropertiesMatch(expected, given, level) {
 
       if (givenProp === null) {
         throw new AssertionException("Could not find given " + given + " property named: " + propName);
-      } else {
+      }
+      else {
         var objType = Object.prototype.toString.call(givenProp);
         if (objType == "[object UIAElementNil]") {
           throw new AssertionException("found no elements for " + given.toString() + '.' + propName + "()");
-        } else if (objType == "[object Undefined]") {
+        }
+        else if (objType == "[object Undefined]") {
           throw new AssertionException(given.toString() + '.' + propName + "() method not found.");
         }
       }
 
-      try {
-        // null indicates we don't care to match
-        if (expectedProp === null) {
-          continue;
-        }
+      // null indicates we don't care to match
+      if (expectedProp === null) {
+        continue;
+      }
 
-        var expectedPropType = typeof(expectedProp);
-        if (expectedPropType == "string") {
-          assertEquals(expectedProp, givenProp);
-        } else if (expectedPropType == "number") {
-          assertEquals(expectedProp, givenProp);
-        } else if (expectedPropType == "boolean") {
-          assertEquals(expectedProp, givenProp);
-        } else if (expectedPropType == "function") {
-          if (expectedProp.constructor == RegExp) {
-            assertMatch(expectedProp, givenProp);
-          } else {
-            expectedProp(givenProp);
-          }
-        } else if (expectedPropType == "object") {
-          if (expectedProp.constructor === Array) {
-            assertEquals(expectedProp.length, givenProp.length);
-            for (var i = 0; i < expectedProp.length; i++) {
-              var exp = expectedProp[i];
-              var giv = givenProp[i];
-              try {
-                assertPropertiesMatch(exp, giv, level + 1);
-              } catch(e2) {
-                if (e2.constructor == Array) {
-                  e2[0] = '[' + i + ']' + '.' + e2[0];
-                }
-                throw e2;
-              }
-            }
-          } else if (expectedProp.constructor === RegExp) {
-            assertMatch(expectedProp, givenProp);
-          } else if (typeof(givenProp) == "object") {
-            assertPropertiesMatch(expectedProp, givenProp, level + 1);
-          } else {
-            var message = "[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor;
-            UIALogger.logError(message);
-            throw new AssertionException(message);
-          }
-        } else {
-          UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
+      var expectedPropType = typeof(expectedProp);
+      if (expectedPropType == "string") {
+        assertEquals(expectedProp, givenProp);
+      }
+      else if (expectedPropType == "number") {
+        assertEquals(expectedProp, givenProp);
+      }
+      else if (expectedPropType == "boolean") {
+        assertEquals(expectedProp, givenProp);
+      }
+      else if (expectedPropType == "function") {
+        if (expectedProp.constructor == RegExp) {
+          assertMatch(expectedProp, givenProp);
+        }
+        else {
+          expectedProp(givenProp);
         }
       }
-      catch(e1) {
-        if (e1.constructor == Array) {
-          e1[0] = propName + "." + e1[0];
+      else if (expectedPropType == "object") {
+        if (expectedProp.constructor === Array) {
+          assertEquals(expectedProp.length, givenProp.length, "Length of " + propName + " does not match");
+          for (var i = 0; i < expectedProp.length; i++) {
+            var exp = expectedProp[i];
+            var giv = givenProp[i];
+            assertPropertiesMatch(exp, giv, level + 1);
+          }
         }
-        throw e1;
+        else if (expectedProp.constructor === RegExp) {
+          assertMatch(expectedProp, givenProp);
+        }
+        else if (typeof(givenProp) == "object") {
+          assertPropertiesMatch(expectedProp, givenProp, level + 1);
+        }
+        else {
+          var message = "[" + propName + "]: Unknown type of object constructor: " + expectedProp.constructor;
+          UIALogger.logError(message);
+          throw new AssertionException(message);
+        }
+      }
+      else {
+        UIALogger.logError("[" + propName + "]: unknown type for expectedProp: " + typeof(expectedProp));
       }
     }
   }
 }
-
