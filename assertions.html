@@ -245,9 +245,11 @@ createImageAsserter('tuneup_folder', 'output_folder', 'ref_images_folder');
       message if the screen doesn’t match the given image.
     </p>
     <p>
-      To avoid false mis-matches, the image assertion mechanism automatically ignores
-      the top 20 points of the screen which is normally occupied by the iOS-provided
-      status bar.
+      One thing that can be confusing is specifying the path to the
+      <code>tuneup_js</code> folder. The path you specify here is going to
+      be different than the one you use in your <code>#import</code> statements.
+      Instead of the path being relative to your test file, it's relative to
+      the working directory in which you run your tests.
     </p>
   </li>
   <li>
@@ -257,6 +259,31 @@ createImageAsserter('tuneup_folder', 'output_folder', 'ref_images_folder');
     </p>
   </li>
 </ol>
+
+<h3>Capturing Screenshots</h3>
+<p>
+  To capture a screenshot to use later in your application, you can add this
+  code snippet in your test:
+</p>
+{% highlight javascript %}
+UIATarget.localTarget().captureScreenWithName("MainScreen");
+{% endhighlight %}
+<p>
+  Then, in your test output folder, you should find the directory for your
+  latest run (typically something like <code>Run 23</code>) and in there
+  you should find the <code>MainScreen.png</code>. You simply need to copy
+  that image to your folder of reference screenshots and use them later
+  in calls to <code>assertScreenMatchesImageNamed</code>.
+</p>
+<p>
+  Note that image-comparison will fail if the sizes of the images do not
+  match, even if the content is an exact match. In some cases your screencapture
+  may include the 20-point status bar at the top so you may need to edit
+  your expectation images in your image-editor of choice and chop off the top
+  part of the image.
+</p>
+
+<h3>Image-Matching Tolerance</h3>
 <p>
   Note that the <code>createImageAsserter</code> function can take an optional fourth
   argument to override the default image-tolerance when comparing images. The default
