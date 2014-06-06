@@ -12,28 +12,28 @@ function extend(destination, source) {
  * Dump the properties out a String returned by the function.
  */
 function dumpProperties(_this) {
-    var dumpStr = "";
-    for (var propName in _this) {
-        if (_this.hasOwnProperty(propName)) {
-            if (dumpStr !== "") {
-                dumpStr += ", ";
-            }
-            dumpStr += (propName + "=" + _this[propName]);
-        }
+  var dumpStr = "";
+  for (var propName in _this) {
+    if (_this.hasOwnProperty(propName)) {
+      if (dumpStr !== "") {
+        dumpStr += ", ";
+      }
+      dumpStr += (propName + "=" + _this[propName]);
     }
+  }
 
-    return dumpStr;
+  return dumpStr;
 };
 
 function getMethods(_this) {
-    var methods = [];
-    for (var m in _this) {
-        //if (typeof _this[m] == "function" && _this.hasOwnProperty(m)) {
-        if (typeof _this[m] == "function") {
-            methods.push(m);
-        }
+  var methods = [];
+  for (var m in _this) {
+    //if (typeof _this[m] == "function" && _this.hasOwnProperty(m)) {
+    if (typeof _this[m] == "function") {
+      methods.push(m);
     }
-    return methods;
+  }
+  return methods;
 }
 
 extend(Array.prototype, {
