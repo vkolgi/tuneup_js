@@ -47,6 +47,90 @@ extend(UIAElement.prototype, {
   },
 
   /**
+   * Dump tree in .js format for copy/paste use in code
+   * varname is used as the first element in the canonical name
+   */
+  elementAccessorDump: function(varName, visibleOnly) {
+    varName = varName === undefined ? "<root element>" : varName;
+    var title = "elementAccessorDump";
+    if (visibleOnly === true) {
+      title += " (of visible elements)";
+      if (!this.isVisible()) return title + ": <none, " + varName + " is not visible>";
+    }
+
+    // element accessor dump helper
+    var ead = function (elem, acc, prefix) {
+      var scalars = ["navigationBar", "popover", "tabBar", "toolbar"];
+      var vectors = ["activityIndicators", "buttons", "collectionViews", "images", "links", "navigationBars",
+                     "pageIndicators", "pickers", "progressIndicators", "scrollViews", "searchBars",
+                     "secureTextFields", "segmentedControls", "sliders", "staticTexts", "switches", "tabBars",
+                     "tableViews", "textFields", "textViews", "toolbars", "webViews"];
+
+      var accessed = [];
+
+      // function to visit an element, and add it to an array of what was discovered
+      var visit = function(someElem, accessor, onlyConsiderNew) {
+        if (undefined === someElem) return;
+        if (!someElem.isNotNil()) return;
+        if (onlyConsiderNew) {
+          for (var i = 0; i < accessed.length; ++i) {
+            if (accessed[i].equals(someElem, 0)) return;
+          }
+        }
+
+        accessed.push(someElem);
+        if (someElem.isVisible() || !visibleOnly) {
+          acc.push(accessor);
+          acc = ead(someElem, acc, accessor);
+        }
+      };
+
+      // try to access an element by name instead of number
+      var getNamedIndex = function(someArray, numericIndex) {
+        var e = someArray[numericIndex];
+        var name = e.name();
+        if (name !== null && e.equals(someArray.firstWithName(name), 0)) {
+            return '"' + name + '"';
+        }
+
+        return numericIndex;
+      }
+
+      // visit scalars
+      for (var i = 0; i < scalars.length; ++i) {
+        visit(elem[scalars[i]](), prefix + "." + scalars[i] + "()", false);
+      }
+
+      // visit the elements of the vectors
+      for (var i = 0; i < vectors.length; ++i) {
+        var elemArray = elem[vectors[i]]();
+        if (undefined === elemArray) continue;
+        for (var j = 0; j < elemArray.length; ++j) {
+          var newElem = elemArray[j];
+          visit(newElem, prefix + "." + vectors[i] + "()[" + getNamedIndex(elemArray, j) + "]", false);
+        }
+      }
+
+      // visit any un-visited items
+      var elemArray = elem.elements()
+      for (var i = 0; i < elemArray.length; ++i) {
+        visit(elemArray[i], prefix + ".elements()[" + getNamedIndex(elemArray, i) + "]", true);
+      }
+      return acc;
+    };
+
+    UIATarget.localTarget().pushTimeout(0);
+    try {
+      return ead(this, [title + " of " + varName + ":", varName], varName, visibleOnly).join("\n");
+    } catch(e) {
+      throw e;
+    } finally {
+      UIATarget.localTarget().popTimeout();
+    }
+
+  },
+
+  /**
    * Dump tree in json format for copy/paste use in AssertWindow and friends
    */
   elementJSONDump: function (recursive, attributes, visibleOnly) {
