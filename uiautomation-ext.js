@@ -26,6 +26,26 @@ var isNotNil = function () {
 
 
 extend(UIAElement.prototype, {
+
+  /**
+   * Equality operator
+   *
+   * Properly detects equality of 2 UIAElement objects
+   * - Can return false positives if 2 elements (and ancestors) have the same name, type, and rect()
+   */
+  equals: function(elem2, maxRecursion) {
+    maxRecursion = maxRecursion === undefined ? -1 : maxRecursion;
+    if (this == elem2) return true; // shortcut when x == x
+    if (null === elem2) return false; // shortcut when one is nil
+    if (!this.isNotNil() || !elem2.isNotNil()) return !this.isNotNil() && !elem2.isNotNil(); // both nil or neither
+    if (this.toString() != elem2.toString()) return false; // element type
+    if (this.name() != elem2.name()) return false;
+    if (JSON.stringify(this.rect()) != JSON.stringify(elem2.rect())) return false; // possible false positives!
+    if (0 == maxRecursion) return true; // stop recursing?
+    if (-100 == maxRecursion) UIALogger.logWarning("Passed 100 recursions in UIAElement.equals");
+    return this.parent() === null || this.parent().equals(elem2.parent(), maxRecursion - 1); // check parent elem
+  },
+
   /**
    * Dump tree in json format for copy/paste use in AssertWindow and friends
    */
