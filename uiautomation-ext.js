@@ -24,6 +24,32 @@ var isNotNil = function () {
   return ret;
 };
 
+extend(UIAElementArray.prototype, {
+  /**
+   * Same as withName, but takes a regular expression
+   */
+  withNameRegex: function(pattern) {
+    var ret = [];
+    for (var i = 0; i < this.length; ++i) {
+      var elem = this[i];
+      if (elem.isNotNil() && elem.name().match(pattern) !== null) {
+        ret.push(elem);
+      }
+    }
+    return ret;
+  },
+
+  /**
+   * Same as firstWithName, but takes a regular expression
+   */
+  firstWithNameRegex: function(pattern) {
+    for (var i = 0; i < this.length; ++i) {
+      var elem = this[i];
+      if (elem.isNotNil() && elem.name().match(pattern) !== null) return elem;
+    }
+    return new UIAElementNil();
+  }
+});
 
 extend(UIAElement.prototype, {
 
