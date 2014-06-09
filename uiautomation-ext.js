@@ -32,7 +32,7 @@ extend(UIAElementArray.prototype, {
     var ret = [];
     for (var i = 0; i < this.length; ++i) {
       var elem = this[i];
-      if (elem.isNotNil() && elem.name().match(pattern) !== null) {
+      if (elem.isNotNil && elem.isNotNil() && elem.name().match(pattern) !== null) {
         ret.push(elem);
       }
     }
@@ -45,7 +45,7 @@ extend(UIAElementArray.prototype, {
   firstWithNameRegex: function(pattern) {
     for (var i = 0; i < this.length; ++i) {
       var elem = this[i];
-      if (elem.isNotNil() && elem.name().match(pattern) !== null) return elem;
+      if (elem.isNotNil && elem.isNotNil() && elem.name().match(pattern) !== null) return elem;
     }
     return new UIAElementNil();
   }
