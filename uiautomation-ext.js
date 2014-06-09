@@ -87,7 +87,7 @@ extend(UIAElement.prototype, {
     // element accessor dump helper
     var ead = function (elem, acc, prefix) {
       var scalars = ["navigationBar", "popover", "tabBar", "toolbar"];
-      var vectors = ["activityIndicators", "buttons", "collectionViews", "images", "links", "navigationBars",
+      var vectors = ["activityIndicators", "buttons", "cells", "collectionViews", "images", "links", "navigationBars",
                      "pageIndicators", "pickers", "progressIndicators", "scrollViews", "searchBars",
                      "secureTextFields", "segmentedControls", "sliders", "staticTexts", "switches", "tabBars",
                      "tableViews", "textFields", "textViews", "toolbars", "webViews"];
@@ -129,6 +129,7 @@ extend(UIAElement.prototype, {
 
       // visit the elements of the vectors
       for (var i = 0; i < vectors.length; ++i) {
+        if (undefined === elem[vectors[i]]) continue;
         var elemArray = elem[vectors[i]]();
         if (undefined === elemArray) continue;
         for (var j = 0; j < elemArray.length; ++j) {
