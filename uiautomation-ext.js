@@ -73,52 +73,51 @@ extend(UIAElement.prototype, {
   },
 
   /**
-   * Dump tree in .js format for copy/paste use in code
-   * varname is used as the first element in the canonical name
+   * General-purpose reduce function
+   *
+   * Applies the callback function to each node in the element tree starting from the current element.
+   *
+   * Callback function takes (previousValue, currentValue <UIAElement>, accessor_prefix, toplevel <UIAElement>)
+   *     where previousValue is: initialValue (first time), otherwise the previous return from the callback
+   *           currentValue is the UIAElement at the current location in the tree
+   *           accessor_prefix is the code to access this element from the toplevel element
+   *           toplevel is the top-level element on which this reduce function was called
+   *
+   * visibleOnly prunes the search tree to visible elements only
    */
-  elementAccessorDump: function(varName, visibleOnly) {
-    varName = varName === undefined ? "<root element>" : varName;
-    var title = "elementAccessorDump";
-    if (visibleOnly === true) {
-      title += " (of visible elements)";
-      if (!this.isVisible()) return title + ": <none, " + varName + " is not visible>";
-    }
-
-    // element accessor dump helper
-    var ead = function (elem, acc, prefix) {
+  _reduce: function(callback, initialValue, visibleOnly) {
+    var reduce_helper = function (elem, acc, prefix) {
       var scalars = ["navigationBar", "popover", "tabBar", "toolbar"];
       var vectors = ["activityIndicators", "buttons", "cells", "collectionViews", "images", "links", "navigationBars",
                      "pageIndicators", "pickers", "progressIndicators", "scrollViews", "searchBars",
                      "secureTextFields", "segmentedControls", "sliders", "staticTexts", "switches", "tabBars",
                      "tableViews", "textFields", "textViews", "toolbars", "webViews"];
 
-      var accessed = [];
-
       // function to visit an element, and add it to an array of what was discovered
+      var accessed = [];
       var visit = function(someElem, accessor, onlyConsiderNew) {
+        // filter invalid
         if (undefined === someElem) return;
         if (!someElem.isNotNil()) return;
+
+        // filter already visited (in cases where we care)
         if (onlyConsiderNew) {
           for (var i = 0; i < accessed.length; ++i) {
             if (accessed[i].equals(someElem, 0)) return;
           }
         }
-
         accessed.push(someElem);
-        if (someElem.isVisible() || !visibleOnly) {
-          acc.push(accessor);
-          acc = ead(someElem, acc, accessor);
-        }
+
+        // filter based on visibility
+        if (visibleOnly && !someElem.isVisible()) return;
+        acc = reduce_helper(someElem, callback(acc, someElem, accessor, this), accessor);
       };
 
       // try to access an element by name instead of number
       var getNamedIndex = function(someArray, numericIndex) {
         var e = someArray[numericIndex];
         var name = e.name();
-        if (name !== null && e.equals(someArray.firstWithName(name), 0)) {
-            return '"' + name + '"';
-        }
-
+        if (name !== null && e.equals(someArray.firstWithName(name), 0)) return '"' + name + '"';
         return numericIndex;
       }
 
@@ -148,13 +147,96 @@ extend(UIAElement.prototype, {
 
     UIATarget.localTarget().pushTimeout(0);
     try {
-      return ead(this, [title + " of " + varName + ":", varName], varName, visibleOnly).join("\n");
+      return reduce_helper(this, initialValue, "");
     } catch(e) {
       throw e;
     } finally {
       UIATarget.localTarget().popTimeout();
     }
 
+  },
+
+  /**
+   * Reduce function
+   *
+   * Applies the callback function to each node in the element tree starting from the current element.
+   *
+   * Callback function takes (previousValue, currentValue <UIAElement>, accessor_prefix, toplevel <UIAElement>)
+   *     where previousValue is: initialValue (first time), otherwise the previous return from the callback
+   *           currentValue is the UIAElement at the current location in the tree
+   *           accessor_prefix is the code to access this element from the toplevel element
+   *           toplevel is the top-level element on which this reduce function was called
+   */
+  reduce: function(callback, initialValue) {
+    return this._reduce(callback, initialValue, false);
+  },
+
+  /**
+   * Reduce function
+   *
+   * Applies the callback function to each visible node in the element tree starting from the current element.
+   *
+   * Callback function takes (previousValue, currentValue <UIAElement>, accessor_prefix, toplevel <UIAElement>)
+   *     where previousValue is: initialValue (first time), otherwise the previous return from the callback
+   *           currentValue is the UIAElement at the current location in the tree
+   *           accessor_prefix is the code to access this element from the toplevel element
+   *           toplevel is the top-level element on which this reduce function was called
+   */
+  reduceVisible: function(callback, initialValue) {
+    return this._reduce(callback, initialValue, true);
+  },
+
+  /**
+   * Find function
+   *
+   * Find elements by given criteria
+   *
+   * Return associative array {accessor: element} of results
+   */
+  find: function(criteria, varName) {
+    if (criteria === undefined) {
+      UIALogger.logWarning("No criteria passed to find function, so assuming {} and returning all elements");
+      criteria = {};
+    }
+    varName = varName === undefined ? "<root element>" : varName;
+    var visibleOnly = criteria.isVisible === true;
+
+    var c = criteria;
+    var collect_fn = function(acc, elem, prefix, _) {
+      if (c.rect !== undefined && JSON.stringify(c.rect) != JSON.stringify(elem.rect())) return acc;
+      if (c.hasKeyboardFocus !== undefined && c.hasKeyboardFocus != elem.hasKeyboardFocus()) return acc;
+      if (c.isEnabled !== undefined && c.isEnabled != elem.isEnabled()) return acc;
+      if (c.isValid !== undefined && c.isValid !== elem.isValid()) return acc;
+      if (c.label !== undefined && c.label != elem.label()) return acc;
+      if (c.name !== undefined && c.name != elem.name()) return acc;
+      if (c.nameRegex !== undefined && elem.name() === null || elem.name().match(c.nameRegex) === null) return acc;
+      if (c.value !== undefined && c.value != elem.value()) return acc;
+
+      acc[varName + prefix] = elem;
+      return acc;
+    }
+
+    return this._reduce(collect_fn, {}, visibleOnly);
+  },
+
+  /**
+   * Dump tree in .js format for copy/paste use in code
+   * varname is used as the first element in the canonical name
+   */
+  elementAccessorDump: function(varName, visibleOnly) {
+    varName = varName === undefined ? "<root element>" : varName;
+    var title = "elementAccessorDump";
+    if (visibleOnly === true) {
+      title += " (of visible elements)";
+      if (!this.isVisible()) return title + ": <none, " + varName + " is not visible>";
+    }
+
+    var collect_fn = function (acc, _, prefix, __) {
+      acc.push(varName + prefix)
+      return acc;
+    };
+
+    return this._reduce(collect_fn, [title + " of " + varName + ":", varName], visibleOnly).join("\n");
   },
 
   /**
