@@ -203,6 +203,7 @@ extend(UIAElement.prototype, {
 
     var c = criteria;
     var collect_fn = function(acc, elem, prefix, _) {
+      if (c.UIAtype !== undefined && "[object " + c.UIAtype + "]" != elem.toString()) return acc;
       if (c.rect !== undefined && JSON.stringify(c.rect) != JSON.stringify(elem.rect())) return acc;
       if (c.hasKeyboardFocus !== undefined && c.hasKeyboardFocus != elem.hasKeyboardFocus()) return acc;
       if (c.isEnabled !== undefined && c.isEnabled != elem.isEnabled()) return acc;
