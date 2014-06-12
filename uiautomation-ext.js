@@ -209,7 +209,7 @@ extend(UIAElement.prototype, {
       if (c.isValid !== undefined && c.isValid !== elem.isValid()) return acc;
       if (c.label !== undefined && c.label != elem.label()) return acc;
       if (c.name !== undefined && c.name != elem.name()) return acc;
-      if (c.nameRegex !== undefined && elem.name() === null || elem.name().match(c.nameRegex) === null) return acc;
+      if (c.nameRegex !== undefined && (elem.name() === null || elem.name().match(c.nameRegex) === null)) return acc;
       if (c.value !== undefined && c.value != elem.value()) return acc;
 
       acc[varName + prefix] = elem;
