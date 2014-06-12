@@ -593,6 +593,34 @@ extend(UIAElement.prototype, {
     this.waitForInvalid();
   },
 
+  /**
+   * verify that a text field is editable by tapping in it and waiting for a keyboard to appear.
+   */
+  checkIsEditable: function () {
+    try {
+      var keyboardWasUp = target.frontMostApp().keyboard().isVisible();
+
+      // warn user if this is an object that might be destructively or oddly affected by this check
+      switch (this.toString()) {
+      case "[object UIAButton]":
+      case "[object UIALink]":
+      case "[object UIAActionSheet]":
+      case "[object UIAKey]":
+      case "[object UIAKeyboard]":
+        UIALogger.logWarning("checkIsEditable is going to tap() an object of type " + this.toString());
+      default:
+        this.tap();
+      }
+
+      // wait for keyboard to disappear if it was already active
+      if (keyboardWasUp) UIATarget.localTarget().delay(0.35);
+      target.frontMostApp().keyboard().waitUntilVisible(2);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
   isNotNil: isNotNil,
 });
 
