@@ -163,6 +163,12 @@ function(e) { return e; };
   appearing on-screen) before the given <code>timeout</code>.
 </p>
 
+<h3>UIAElement.prototype.equals(other)</h3>
+<p>
+  Two element objects are equal if they have the same name, type and <code>rect()</code>
+  on the screen.
+</p>
+
 <h3>UIAElementNil.prototype.isNotNil()</h3>
 <p>
   Always returns <code>true</code>. This function is handy when iterating through
@@ -182,6 +188,19 @@ function(e) { return e; };
   Always returns <code>false</code>. This function is handy when iterating through
   child-elements, some of which may be instances of <code>UIAElementNil</code>,
   which does not have this method.
+</p>
+
+
+<h3>UIAElementArray.prototype.withNameRegex(pattern)</h3>
+<p>
+  Returns items in the array whose <code>name()</code> property matches
+  the given regular expression pattern.
+</p>
+
+<h3>UIAElementArray.prototype.firstWithNameRegex(pattern)</h3>
+<p>
+  Returns the first item whose <code>name()</code> matches the given
+  regular expression pattern.
 </p>
 
 <h3>UIAApplication.prototype.navigationTitle()</h3>
@@ -308,14 +327,54 @@ function(e) { return e; };
   one!
 </p>
 
-<h3>Object.prototype.dumpProperties()</h3>
+<h3>dumpProperties(object)</h3>
 <p>
   A debugging method that dumps the object's properties to a returned <code>String</code>.
 </p>
 
-<h3>Object.prototype.getMethods()</h3>
+<h3>getMethods(object)</h3>
 <p>
-  Returns all of the methods for the target as an array of functions.
+  Returns all of the methods for the given object as an array of functions.
+</p>
+
+<h3>reduce(callback, initialValue)</h3>
+<p>
+  Applies the callback function to each node in the element tree starting from the current element.
+</p>
+<p>
+  Callback function takes (<code>previousValue</code>,
+  <code>currentValue &lt;UIAElement&gt;</code>,
+  <code>accessor_prefix</code>, <code>toplevel &lt;UIAElement&gt;</code>)
+  where previousValue is: initialValue
+  (first time), otherwise the previous return from the callback currentValue is
+  the UIAElement at the current location in the tree accessor_prefix is the code
+  to access this element from the toplevel element  toplevel is the top-level
+  element on which this reduce function was called.
+</p>
+
+<h3>find(criteria, varName)</h3>
+<p>
+  Find elements by the given criteria function. Returns associative array
+  {accessor: element} of results.
+</p>
+
+<h3>elementAccessorDump(varName, visibleOnly)</h3>
+<p>
+   Dump tree in .js format for copy/paste use in code
+  varname is used as the first element in the canonical name.
+</p>
+
+<h3>waitUntilAccessorSelect(lookupFunctions, timeoutInSeconds)</h3>
+<p>
+  Wait until one lookup_function(this) in an associative array of lookup functions
+  returns a valid lookup.  Return an associative array of
+  {key: &lt;element found&gt;, elem: &lt;the element that was found&gt;}
+</p>
+
+<h3>checkIsEditable()</h3>
+<p>
+  Verify that a text field is editable by tapping in it and waiting for
+  a keyboard to appear.
 </p>
 
 <h3>Array.prototype.contains(f)</h3>
