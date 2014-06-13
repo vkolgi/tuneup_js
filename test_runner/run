@@ -8,6 +8,7 @@ require "tempfile"
 require File.expand_path(File.join(File.dirname(__FILE__), "preprocessor"))
 require File.expand_path(File.join(File.dirname(__FILE__), "console_output"))
 require File.expand_path(File.join(File.dirname(__FILE__), "colored_console_output"))
+require File.expand_path(File.join(File.dirname(__FILE__), "abbreviated_console_output"))
 require File.expand_path(File.join(File.dirname(__FILE__), "xunit_output"))
 
 options = OpenStruct.new
@@ -22,6 +23,10 @@ opts_parser = OptionParser.new do |opts|
   opts.on("-d", "--device DEVICE", "Device UDID to run test against,",
           "or 'dynamic' to find the UDID at runtime") do |dev|
     options.device = dev
+  end
+
+  opts.on("-w", "--simName SIMULATORNAME", "Simulator name to target") do |dev|
+    options.simulatorName = dev
   end
 
   opts.on("-e", "--environment ENV", "Pass variables in the form of name=value") do |env|
@@ -53,6 +58,10 @@ opts_parser = OptionParser.new do |opts|
 
   opts.on("-c", "--color", "Colorize the console output") do
     options.colorize = true
+  end
+  
+  opts.on("-b", "--brief", "Abbreviated and colorized console output") do
+    options.brief = true
   end
 
   opts.on("-p", "--preprocess", "Use own preprocessor to substitude imports") do
@@ -102,7 +111,7 @@ raise "Output directory #{test_output} does not exist" unless File.directory?(te
 # Output options
 outputs = []
 unless options.quiet    # HINT this could be moved into the actual options parsing
-  outputs << (options.colorize ? ColoredConsoleOutput.new : ConsoleOutput.new)
+  outputs << (options.colorize ? ColoredConsoleOutput.new : (options.brief ? AbbreviatedConsoleOutput.new : ConsoleOutput.new))
 end
 if options.xunit
   report_filename = File.join(test_output, File.basename(test_script, File.extname(test_script)) + ".xml")
@@ -194,7 +203,12 @@ XCODE_ROOT = `/usr/bin/xcode-select -print-path`.chomp.sub(/^\s+/, "")
 TEMPLATE = `[ -f /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate ] && echo "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate" || echo "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"`.chomp.sub(/^\s+/, "")
 
 command = ["env", "DEVELOPER_DIR=#{XCODE_ROOT}", "/usr/bin/instruments"]
-command << "-w" << options.device if options.device
+if options.device
+  command << "-w" << options.device 
+elsif options.simulatorName
+  command << "-w" << options.simulatorName
+end 
+  
 command << "-t" << "#{TEMPLATE}"
 command << app_bundle
 command << "-e" << "UIASCRIPT" << test_script
