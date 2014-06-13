@@ -201,6 +201,18 @@ extend(UIAElement.prototype, {
     varName = varName === undefined ? "<root element>" : varName;
     var visibleOnly = criteria.isVisible === true;
 
+    var knownOptions = {UIAtype: 1, rect: 1, hasKeyboardFocus: 1, isEnabled: 1, isValid: 1,
+                        label: 1, name: 1, nameRegex: 1, value: 1};
+
+    // helpful check, mostly catching capitalization errors
+    for (var k in criteria) {
+      if (knownOptions[k] === undefined) {
+        UIALogger.logWarning(this.toString() + ".find() received unknown criteria field '" + k + "' "
+                             + "(known fields are " + Object.keys(knownOptions).join(", ") + ")");
+
+      }
+    }
+
     var c = criteria;
     var collect_fn = function(acc, elem, prefix, _) {
       if (c.UIAtype !== undefined && "[object " + c.UIAtype + "]" != elem.toString()) return acc;
