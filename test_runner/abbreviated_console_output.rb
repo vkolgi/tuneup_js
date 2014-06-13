@@ -10,13 +10,13 @@ class AbbreviatedConsoleOutput < ColoredConsoleOutput
   def format(status, msg)
     output = nil
     if status
-        output = self.messageForStatus(status, msg);
+        output = self.message_for_status(status, msg);
         output = colorize(output, STATUS_COLORS[status]) if STATUS_COLORS[status]
     end
     output
   end
-  
-  def messageForStatus(status, msg)
+
+  def message_for_status(status, msg)
     message = nil
     case status
       when /^default/
@@ -24,7 +24,7 @@ class AbbreviatedConsoleOutput < ColoredConsoleOutput
       when /^start/
         message = "\n> #{status.to_s.capitalize}: #{msg}"
       when /^fail/
-        message = "X #{status.to_s.capitalize}: #{msg}" 
+        message = "X #{status.to_s.capitalize}: #{msg}"
       when /^pass/
         message = "#{status.to_s.capitalize}: #{msg}"
       when /^warning/
@@ -32,7 +32,7 @@ class AbbreviatedConsoleOutput < ColoredConsoleOutput
       when /^issue/
         message = "    ! #{status.to_s.capitalize}: #{msg}"
     end
-      
+
     message
   end
 end
