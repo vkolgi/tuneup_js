@@ -432,7 +432,7 @@ extend(UIAElement.prototype, {
    */
   waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds, label) {
     var isNotUseless = function (elem) {
-      return elem !== null && elem.isNotNil();
+      return elem && elem.isNotNil();
     }
 
     // this function will be referenced in waitUntil -- it supplies
@@ -471,7 +471,7 @@ extend(UIAElement.prototype, {
    */
   waitUntilAccessorSelect: function (lookup_functions, timeoutInSeconds) {
     var isNotUseless = function (elem) {
-      return elem !== null && elem.isNotNil();
+      return elem && elem.isNotNil();
     }
 
     // this function will be referenced in waitUntil -- it supplies
@@ -540,7 +540,7 @@ extend(UIAElement.prototype, {
       retry(function () {
         var filteredElement = filterFunction(element);
         if (!conditionFunction(filteredElement)) {
-          if (!(filteredElement !== null && filteredElement.isNotNil())) {
+          if (!(filteredElement && filteredElement.isNotNil())) {
             var label = (filteredElement && filteredElement.label) ? filteredElement.label() : "Element";
             // make simple error message if the element doesn't exist
             throw ([label, "failed", description,
