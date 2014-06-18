@@ -486,31 +486,34 @@ extend(UIAElement.prototype, {
     }
 
     // composite find function
-    var find_any = function (element) {
+    var find_all = function (element) {
+      var ret = {};
       for (var k in lookup_functions) {
         var lookup_function = lookup_functions[k];
         try {
           var el = lookup_function(element);
-          if (isNotUseless(el)) return {key: k, elem: el};
+          if (isNotUseless(el)) {
+            ret[k] = el;
+          }
         }
         catch (e) {
           // ignore
         }
       }
-      return new UIAElementNil();
+      return ret;
     };
 
     this.waitUntil(function (element) {
-        var result = find_any(element);
-        if (undefined !== result) return result["elem"];
+        var result = find_all(element);
+        for (var k in result) return result[k]; // just returning the first element will signal completion
 
-        // annotate the found elements with the label function if they are nil
+        // no elements, found, so create a fake element and annotate it with a label function
         var fakeNil = new UIAElementNil();
         if (label !== undefined) fakeNil.label = label_fn;
         return fakeNil;
       }, isNotUseless,
       timeoutInSeconds, "to produce any acceptable return values");
-    return find_any(this);
+    return find_all(this);
   },
 
 
