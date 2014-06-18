@@ -202,7 +202,7 @@ extend(UIAElement.prototype, {
     var visibleOnly = criteria.isVisible === true;
 
     var knownOptions = {UIAtype: 1, rect: 1, hasKeyboardFocus: 1, isEnabled: 1, isValid: 1,
-                        label: 1, name: 1, nameRegex: 1, value: 1};
+                        label: 1, name: 1, nameRegex: 1, value: 1, isVisible: 1};
 
     // helpful check, mostly catching capitalization errors
     for (var k in criteria) {
@@ -214,6 +214,7 @@ extend(UIAElement.prototype, {
     }
 
     var c = criteria;
+    // don't consider isVisible here, because we do it in this._reduce
     var collect_fn = function(acc, elem, prefix, _) {
       if (c.UIAtype !== undefined && "[object " + c.UIAtype + "]" != elem.toString()) return acc;
       if (c.rect !== undefined && JSON.stringify(c.rect) != JSON.stringify(elem.rect())) return acc;
