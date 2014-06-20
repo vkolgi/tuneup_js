@@ -517,7 +517,18 @@ extend(UIAElement.prototype, {
         return fakeNil;
       }, isNotUseless,
       timeoutInSeconds, "to produce any acceptable return values");
-    return find_all(this);
+
+      // repeat the find to return the found elements.
+      // we need to reinstate the timeout since some elements might not be found, and would delay things
+      try {
+        UIATarget.localTarget().pushTimeout(0);
+        return find_all(this);
+      } catch (e) {
+        UIALogger.logDebug("waitUntilAccessorSelect encountered error the 2nd time running find_all: " + e);
+        throw e;
+      } finally {
+        UIATarget.localTarget().popTimeout();
+      }
   },
 
 
