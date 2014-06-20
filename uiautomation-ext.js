@@ -32,7 +32,7 @@ extend(UIAElementArray.prototype, {
     var ret = [];
     for (var i = 0; i < this.length; ++i) {
       var elem = this[i];
-      if (elem.isNotNil && elem.isNotNil() && elem.name() && elem.name().match(pattern) !== null) {
+      if (elem && elem.isNotNil && elem.isNotNil() && elem.name() && elem.name().match(pattern) !== null) {
         ret.push(elem);
       }
     }
@@ -45,7 +45,7 @@ extend(UIAElementArray.prototype, {
   firstWithNameRegex: function(pattern) {
     for (var i = 0; i < this.length; ++i) {
       var elem = this[i];
-      if (elem.isNotNil && elem.isNotNil() && elem.name() && elem.name().match(pattern) !== null) return elem;
+      if (elem && elem.isNotNil && elem.isNotNil() && elem.name() && elem.name().match(pattern) !== null) return elem;
     }
     return new UIAElementNil();
   }
@@ -436,7 +436,7 @@ extend(UIAElement.prototype, {
    */
   waitUntilAccessorSuccess: function (lookup_function, timeoutInSeconds, label) {
     var isNotUseless = function (elem) {
-      return elem && elem.isNotNil();
+      return elem && elem.isNotNil && elem.isNotNil();
     }
 
     // this function will be referenced in waitUntil -- it supplies
@@ -475,7 +475,7 @@ extend(UIAElement.prototype, {
    */
   waitUntilAccessorSelect: function (lookup_functions, timeoutInSeconds) {
     var isNotUseless = function (elem) {
-      return elem && elem.isNotNil();
+      return elem && elem.isNotNil && elem.isNotNil();
     }
 
     // this function will be referenced in waitUntil -- it supplies
