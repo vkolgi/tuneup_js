@@ -45,7 +45,10 @@ extend(UIAElementArray.prototype, {
   firstWithNameRegex: function(pattern) {
     for (var i = 0; i < this.length; ++i) {
       var elem = this[i];
-      if (elem && elem.isNotNil && elem.isNotNil() && elem.name() && elem.name().match(pattern) !== null) return elem;
+      if (elem && elem.isNotNil && elem.isNotNil() && elem.name()) {
+          if (elem.name().match(pattern) !== null) return elem;
+          UIALogger.logDebug("firstWithNameRegex decided that " + pattern + " did not match elem with name = " + elem.name());
+      }
     }
     return new UIAElementNil();
   }
@@ -558,7 +561,7 @@ extend(UIAElement.prototype, {
       retry(function () {
         var filteredElement = filterFunction(element);
         if (!conditionFunction(filteredElement)) {
-          if (!(filteredElement && filteredElement.isNotNil())) {
+          if (!(filteredElement && filteredElement.isNotNil && filteredElement.isNotNil())) {
             var label = (filteredElement && filteredElement.label) ? filteredElement.label() : "Element";
             // make simple error message if the element doesn't exist
             throw ([label, "failed", description,
