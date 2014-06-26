@@ -630,27 +630,46 @@ extend(UIAElement.prototype, {
   /**
    * verify that a text field is editable by tapping in it and waiting for a keyboard to appear.
    */
-  checkIsEditable: function () {
+  checkIsEditable: function (maxAttempts) {
+    // minimum of 1 attempt
+    maxAttempts = (maxAttempts === undefined || maxAttempts < 1) ? 1 : maxAttempts;
+
+    // warn user if this is an object that might be destructively or oddly affected by this check
+    switch (this.toString()) {
+    case "[object UIAButton]":
+    case "[object UIALink]":
+    case "[object UIAActionSheet]":
+    case "[object UIAKey]":
+    case "[object UIAKeyboard]":
+      UIALogger.logWarning("checkIsEditable is going to tap() an object of type " + this.toString());
+    default:
+      // no warning
+    }
+
+    var kb;
     try {
-      var keyboardWasUp = target.frontMostApp().keyboard().isVisible();
+      var didFirstTap = false;
+      do {
+        if (didFirstTap) {
+          UIALogger.logDebug("checkIsEdiable: retrying element tap, because kb = " + kb.toString()
+                             + " with " + maxAttempts.toString() + " remaining attempts");
+        }
+        maxAttempts--;
 
-      // warn user if this is an object that might be destructively or oddly affected by this check
-      switch (this.toString()) {
-      case "[object UIAButton]":
-      case "[object UIALink]":
-      case "[object UIAActionSheet]":
-      case "[object UIAKey]":
-      case "[object UIAKeyboard]":
-        UIALogger.logWarning("checkIsEditable is going to tap() an object of type " + this.toString());
-      default:
         this.tap();
-      }
+        didFirstTap = true;
+        delay(0.35); // keyboard will take roughly this long to appear (or disappear if was visible for other field).
+        //bonus: delays the while loop
 
-      // wait for keyboard to disappear if it was already active
-      if (keyboardWasUp) UIATarget.localTarget().delay(0.35);
-      target.frontMostApp().keyboard().waitUntilVisible(2);
+        kb = target.frontMostApp().keyboard();
+      } while (!kb.isNotNil() && 0 < maxAttempts);
+
+      if (!kb.isNotNil()) return false;
+
+      kb.waitUntilVisible(1);
       return true;
     } catch (e) {
+      UIALogger.logDebug("checkIsEditable caught error: " + e);
       return false;
     }
   },
@@ -823,11 +842,13 @@ extend(UIAKeyboard.prototype, {
 });
 
 var typeString = function (pstrString, pbClear) {
-  pstrString = pstrString.toString();
-  // handle keyboard not being focused
-  if (!this.hasKeyboardFocus()) {
-    this.tap();
+  pstrString = pstrString.toString(); // force string argument to actual string
+
+  // make sure we can type (side effect: brings up keyboard)
+  if (!this.checkIsEditable(2)) {
+    throw "typeString couldn't get the keyboard to appear for element " + this.toString() + " with name '" + this.name() + "'";
   }
+
   var kb, db; // keyboard, deleteButton
   var seconds = 2;
   var waitTime = 0.25;
@@ -835,11 +856,13 @@ var typeString = function (pstrString, pbClear) {
   var noSuccess = true;
   var failMsg = null;
 
+  kb = target.frontMostApp().keyboard();
+
   // attempt to get a successful keypress several times -- using the first character
   // this is a hack for iOS 6.x where the keyboard is sometimes "visible" before usable
   while ((pbClear || noSuccess) && 0 < maxAttempts--) {
     try {
-      kb = target.frontMostApp().keyboard();
+
       // handle clearing
       if (pbClear) {
         db = kb.buttons()["Delete"];
