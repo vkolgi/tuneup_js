@@ -47,7 +47,6 @@ extend(UIAElementArray.prototype, {
       var elem = this[i];
       if (elem && elem.isNotNil && elem.isNotNil() && elem.name()) {
           if (elem.name().match(pattern) !== null) return elem;
-          UIALogger.logDebug("firstWithNameRegex decided that " + pattern + " did not match elem with name = " + elem.name());
       }
     }
     return new UIAElementNil();
