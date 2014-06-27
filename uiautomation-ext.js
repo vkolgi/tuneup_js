@@ -627,9 +627,15 @@ extend(UIAElement.prototype, {
   },
 
   /**
-   * verify that a text field is editable by tapping in it and waiting for a keyboard to appear.
+   * Check whether tapping this element produces another element.  Used for supporting other checkX functions
+   *
+   * (this) - the element that we will tap
+   * callerName - the name of the function that calls this function, used for logging
+   * elementAccessor - a function that returns the element we are trying to produce
+   * elementDescription - describe the element we are trying to produce, for logging
+   * maxAttempts - Optional, how many times to check (soft-limited to minimum of 1)
    */
-  checkIsEditable: function (maxAttempts) {
+  _checkProducesElement: function (callerName, elementAccessor, elementDescription, maxAttempts) {
     // minimum of 1 attempt
     maxAttempts = (maxAttempts === undefined || maxAttempts < 1) ? 1 : maxAttempts;
 
@@ -640,37 +646,59 @@ extend(UIAElement.prototype, {
     case "[object UIAActionSheet]":
     case "[object UIAKey]":
     case "[object UIAKeyboard]":
-      UIALogger.logWarning("checkIsEditable is going to tap() an object of type " + this.toString());
+      UIALogger.logWarning(callerName + " is going to tap() an object of type " + this.toString());
     default:
       // no warning
     }
 
-    var kb;
+    var elem;
     try {
       var didFirstTap = false;
       do {
         if (didFirstTap) {
-          UIALogger.logDebug("checkIsEdiable: retrying element tap, because kb = " + kb.toString()
+          UIALogger.logDebug(callerName + ": retrying element tap, because "
+                             + elementDescription + " = " + elem
                              + " with " + maxAttempts.toString() + " remaining attempts");
         }
         maxAttempts--;
 
         this.tap();
         didFirstTap = true;
-        delay(0.35); // keyboard will take roughly this long to appear (or disappear if was visible for other field).
+        delay(0.35); // element should take roughly this long to appear (or disappear if was visible for other field).
         //bonus: delays the while loop
 
-        kb = target.frontMostApp().keyboard();
-      } while (!kb.isNotNil() && 0 < maxAttempts);
+        elem = elementAccessor();
+      } while (!elem.isNotNil() && 0 < maxAttempts);
 
-      if (!kb.isNotNil()) return false;
+      if (!elem.isNotNil()) return false;
 
-      kb.waitUntilVisible(1);
+      elem.waitUntilVisible(1);
       return true;
     } catch (e) {
-      UIALogger.logDebug("checkIsEditable caught error: " + e);
+      UIALogger.logDebug("_checkProduceElement (for " + callerName + ") caught error: " + e);
       return false;
     }
+  },
+
+
+  /**
+   * verify that a text field is editable by tapping in it and waiting for a keyboard to appear.
+   */
+  checkIsEditable: function (maxAttempts) {
+    var getKb = function () {
+      return target.frontMostApp().keyboard();
+    };
+    return this._checkProducesElement("checkIsEditable", getKb, "keyboard", maxAttempts);
+  },
+
+  /**
+   * verify that a text field is editable by tapping in it and waiting for a keyboard to appear.
+   */
+  checkIsPickable: function (maxAttempts) {
+    var getPicker = function () {
+      return target.frontMostApp().windows()[1].pickers()[0];
+    };
+    return this._checkProducesElement("checkIsPickable", getPicker, "picker", maxAttempts);
   },
 
   isNotNil: isNotNil,
@@ -903,19 +931,43 @@ var typeString = function (pstrString, pbClear) {
 
 };
 
+/**
+ * Set the value of a date text field by manipulating the picker wheels
+ *
+ * All values are numeric and (should) work across languages.  All values are optional.
+ */
+var pickDate = function(year, month, day) {
+  // make sure we can type (side effect: brings up picker)
+  if (!this.checkIsPickable(2)) {
+    throw "pickDate couldn't get the picker to appear for element " + this.toString() + " with name '" + this.name() + "'";
+  }
+
+  var wheel = target.frontMostApp().windows()[1].pickers()[0].wheels();
+  if (year !== undefined) wheel[2].selectValue(year.toString());
+  if (month !== undefined) wheel[0].selectValue(wheel[0].values()[month - 1]); // read localized value, set that value
+  if (day !== undefined) wheel[1].selectValue(day.toString());
+};
+
 extend(UIATextField.prototype, {
   typeString: typeString,
   clear: function () {
     this.typeString("", true);
-  }
+  },
+  pickDate: pickDate,
 });
 
 extend(UIATextView.prototype, {
   typeString: typeString,
   clear: function () {
     this.typeString("", true);
-  }
+  },
+  pickDate: pickDate
 });
+
+extend(UIAStaticText.prototype, {
+  pickDate: pickDate
+});
+
 
 extend(UIAPickerWheel.prototype, {
 
