@@ -54,6 +54,13 @@ extend(UIAElementArray.prototype, {
 extend(UIAElement.prototype, {
 
   /**
+   * Creates a screenshot of the UIElement and saves it to the log directory with the given name
+   */
+  captureWithName: function(capture_name) {
+    var target = UIATarget.localTarget();
+    target.captureRectWithName(this.rect(), capture_name);
+  },
+  /**
    * Equality operator
    *
    * Properly detects equality of 2 UIAElement objects
