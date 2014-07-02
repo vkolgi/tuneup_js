@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = 'tuneup_js'
-  spec.version          = '1.2.0'
+  spec.version          = '1.2.1'
   spec.license          = { :type => 'MIT' }
   spec.homepage         = 'http://www.tuneupjs.org'
   spec.authors          = {
@@ -17,6 +17,7 @@ Pod::Spec.new do |spec|
     'Ian' => 'ifreecarve@gmail.com',
     'Jerry Jaskierny' => 'jaskiern@channelsix.org',
     'Kevin Connor' => 'kconnor@book.com',
+    'Thomas Deegan' => 'tdeegan@yahoo-inc.com',
     'Luke Deniston' => 'luke@agrian.com',
     'Max Metral' => 'mmetral@paypal.com',
     'Max Rabin' => 'max@glidetalk.com',
@@ -44,7 +45,7 @@ Pod::Spec.new do |spec|
   spec.summary          = 'A JavaScript library to ease automated iOS UI testing with UIAutomation and Instruments.'
   spec.source           = {
     :git => 'https://github.com/alexvollmer/tuneup_js.git',
-    :tag => '1.2.0'
+    :tag => '1.2.1'
   }
   spec.source_files     = '*.js', 'image_asserter', 'image_assertion.rb', 'test_runner/*'
   spec.requires_arc     = false
