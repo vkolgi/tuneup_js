@@ -8,6 +8,11 @@
  * The +options+ parameter is an optional object/hash thingie that
  * supports the following:
  *    logTree -- a boolean to log the element tree when the test fails (default 'true')
+ *    logStackTrace -- log a backtrace to the console when a test fails (default 'false')
+ *    logTreeJSON -- log the UI element tree as JSON when a test fails (default 'false')
+ *    screenCapture -- Capture the state of the screen when a test fails (default 'true')
+ *    onSuccess -- a function invoked with no arguments when a test passes (default no-op)
+ *    onFailure -- a function accepting an error argument when the test fails (default no-op)
  *
  * Example:
  * test("Sign-In", function(target, application) {
@@ -40,6 +45,7 @@ function test(title, f, options) {
   try {
     f(target, application);
     UIALogger.logPass(title);
+    if (options.onSuccess) options.onSuccess();
   }
   catch (e) {
     UIALogger.logError(e.toString());
@@ -47,6 +53,7 @@ function test(title, f, options) {
     if (options.logTree) target.logElementTree();
     if (options.logTreeJSON) application.mainWindow().logElementTreeJSON();
     if (options.screenCapture) target.captureScreenWithName(title + '-fail');
+    if (options.onFailure) options.onFailure(e);
     UIALogger.logFail(title);
   }
 }
@@ -61,7 +68,9 @@ function testCreateDefaultOptions() {
     logStackTrace: false,
     logTree: true,
     logTreeJSON: false,
-    screenCapture: true
+    screenCapture: true,
+    onSuccess: function() {},
+    onFailure: function(error) {}
   };
 }
 
