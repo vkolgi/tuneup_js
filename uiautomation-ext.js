@@ -506,9 +506,16 @@ extend(UIAElement.prototype, {
       return new UIAElementNil();
     };
 
+    //cache find_any() results since we want to use the values later. We don't want to reinvokve find_any() because the UI might have changed since we last found something
+    //and if it no longer finds anything then find_any() will return UIAElementNil(), which we would then return, breaking the api contract to return a {key: elem:} object.
+    var successfulResult = null;
+
     this.waitUntil(function (element) {
         var result = find_any(element);
-        if (undefined !== result) return result["elem"];
+        if (undefined !== result) {
+	      successfulResult = result;
+	      return result["elem"];
+        } 
 
         // annotate the found elements with the label function if they are nil
         var fakeNil = new UIAElementNil();
@@ -516,7 +523,7 @@ extend(UIAElement.prototype, {
         return fakeNil;
       }, isNotUseless,
       timeoutInSeconds, "to produce any acceptable return values");
-    return find_any(this);
+    return successfulResult;
   },
 
 
