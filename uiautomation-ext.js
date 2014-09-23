@@ -508,7 +508,7 @@ extend(UIAElement.prototype, {
 
     this.waitUntil(function (element) {
         var result = find_any(element);
-        if (undefined !== result && result.isNotNil()) {  //find_any() will return UIAElementNilSingleton if not found and we don't want to start processing that-especially not result["elem"]
+        if (undefined !== result && result !== UIAElementNilSingleton) {  //find_any() will return UIAElementNilSingleton if not found and we don't want to start processing that-especially not result["elem"]
 	      successfulResult = result;
 	      return result["elem"];
         } 
