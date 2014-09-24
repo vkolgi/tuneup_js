@@ -1,6 +1,9 @@
 #import "assertions.js";
 #import "lang-ext.js";
 
+//We cannot instantiate a UIAElementNil and still get our extensions, so we hold onto one.
+UIAElementNilSingleton =  UIATarget.localTarget().frontMostApp().mainWindow().staticTexts().firstWithName("notFoundx123hfhfhfhfhfhed");
+
 extend(UIATableView.prototype, {
   /**
    * A shortcut for:
@@ -480,13 +483,6 @@ extend(UIAElement.prototype, {
       return elem !== null && elem.isNotNil();
     }
 
-    // this function will be referenced in waitUntil -- it supplies
-    //   the name of what we are waiting for
-    var label = "Functions for [" + Object.keys(lookup_functions).join(", ") + "]";
-    var label_fn = function () {
-      return label;
-    }
-
     if (!isNotUseless(this)) {
       throw "waitUntilAccessorSelect: won't work because the top element isn't valid";
     }
@@ -503,7 +499,7 @@ extend(UIAElement.prototype, {
           // ignore
         }
       }
-      return new UIAElementNil();
+      return UIAElementNilSingleton; //do not create a new UIAElementNil as our prototype extensions are not on that object.
     };
 
     //cache find_any() results since we want to use the values later. We don't want to reinvokve find_any() because the UI might have changed since we last found something
@@ -512,15 +508,12 @@ extend(UIAElement.prototype, {
 
     this.waitUntil(function (element) {
         var result = find_any(element);
-        if (undefined !== result) {
+        if (undefined !== result && result !== UIAElementNilSingleton) {  //find_any() will return UIAElementNilSingleton if not found and we don't want to start processing that-especially not result["elem"]
 	      successfulResult = result;
 	      return result["elem"];
         } 
-
-        // annotate the found elements with the label function if they are nil
-        var fakeNil = new UIAElementNil();
-        if (label !== undefined) fakeNil.label = label_fn;
-        return fakeNil;
+        // we cannot support annotating the found elements with the label function if they are nil, because we reuse UIAElementNilSingleton
+		return UIAElementNilSingleton;
       }, isNotUseless,
       timeoutInSeconds, "to produce any acceptable return values");
     return successfulResult;
