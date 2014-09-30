@@ -200,7 +200,16 @@ end
 SDKROOT = `/usr/bin/xcodebuild -version -sdk iphoneos | grep PlatformPath`.split(":")[1].chomp.sub(/^\s+/, "")
 XCODE_ROOT = `/usr/bin/xcode-select -print-path`.chomp.sub(/^\s+/, "")
 
-TEMPLATE = `[ -f /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate ] && echo "#{SDKROOT}/Developer/Library/Instruments/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate" || echo "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"`.chomp.sub(/^\s+/, "")
+# path is different for Instruments 6.0
+if File.directory? "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.xrplugin/"
+  instruments_folder = "AutomationInstrument.xrplugin";
+else
+  # older instruments path
+  instruments_folder = "AutomationInstrument.bundle";
+end
+
+
+TEMPLATE = `[ -f /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Instruments/PlugIns/#{instruments_folder}/Contents/Resources/Automation.tracetemplate ] && echo "#{SDKROOT}/Developer/Library/Instruments/PlugIns/#{instruments_folder}/Contents/Resources/Automation.tracetemplate" || echo "#{XCODE_ROOT}/../Applications/Instruments.app/Contents/PlugIns/#{instruments_folder}/Contents/Resources/Automation.tracetemplate"`.chomp.sub(/^\s+/, "")
 
 command = ["env", "DEVELOPER_DIR=#{XCODE_ROOT}", "/usr/bin/instruments"]
 if options.device
