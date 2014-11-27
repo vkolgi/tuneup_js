@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = 'tuneup_js'
-  spec.version          = '1.2.1'
+  spec.version          = '1.2.2'
   spec.license          = { :type => 'MIT' }
   spec.homepage         = 'http://www.tuneupjs.org'
   spec.authors          = {
@@ -47,6 +47,6 @@ Pod::Spec.new do |spec|
     :git => 'https://github.com/alexvollmer/tuneup_js.git',
     :tag => '1.2.1'
   }
-  spec.source_files     = '*.js', 'image_asserter', 'image_assertion.rb', 'test_runner/*'
+  spec.resources     = '*.js', 'image_asserter', 'image_assertion.rb', 'test_runner/*'
   spec.requires_arc     = false
 end
