@@ -19,7 +19,43 @@ extend(UIATableView.prototype, {
    */
   assertCellNamed: function (name) {
     assertNotNull(this.cellNamed(name), "No table cell found named '" + name + "'");
-  }
+  },
+  
+  /**
+   * Searching for cell that have element containing given +childName+ argument.
+   * @param   {String}  elementName  Full name of element
+   * @param   {String}  childName Full or part of element's name
+   * @returns {Object}  Element if found, else null
+   */
+  elementWithChild: function(elementName, childName)
+    {
+      for (var i = 0; i < this.cells().length; i++)
+      {
+        if (this.elements()[i].name() === elementName && this.elements()[i].elements().firstWithPredicate("name contains[c] '" + childName + "'").isVisible())
+        {
+          return this.cells()[i];
+        }
+      }
+      return null;
+    },
+
+    /**
+     * Work same as elementWithChild but return only cell without element that containing given +childName+ argument
+     * @param   {String} elementName  Full name of element
+     * @param   {String} childName Full or part of element's name
+     * @returns {Object} Element index if found, else null
+     */
+    elementWithoutChild: function(elementName, childName)
+    {
+      for (var i = 0; i < this.cells().length; i++)
+      {
+        if (this.elements()[i].name() === elementName && this.elements()[i].elements().firstWithPredicate("name contains[c] '" + childName + "'").isVisible() === false)
+        {
+          return this.cells()[i];
+        }
+      }
+      return null;
+    }
 });
 
 var isNotNil = function () {
