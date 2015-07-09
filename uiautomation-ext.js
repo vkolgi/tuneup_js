@@ -2,7 +2,9 @@
 #import "lang-ext.js";
 
 //We cannot instantiate a UIAElementNil and still get our extensions, so we hold onto one.
-UIAElementNilSingleton =  UIATarget.localTarget().frontMostApp().mainWindow().staticTexts().firstWithName("notFoundx123hfhfhfhfhfhed");
+UIATarget.localTarget().pushTimeout(1);
+UIAElementNilSingleton = UIATarget.localTarget().frontMostApp().mainWindow().staticTexts().firstWithName("notFoundx123hfhfhfhfhfhed");
+UIATarget.localTarget().popTimeout();
 
 extend(UIATableView.prototype, {
   /**
